@@ -29,11 +29,11 @@ const Headers = {
   getHeadersWithToken: function (clientData, authData) {
     let headers = this.getHeadersDefault(clientData)
 
-    const tt = !!authData.tokenObject ? authData.tokenObject.tokenType : undefined
-    const at = !!authData.tokenObject ? authData.tokenObject.accessToken : undefined
+    const tokenType = !!authData.tokenObject ? authData.tokenObject.tokenType : undefined
+    const accessToken = !!authData.tokenObject ? authData.tokenObject.accessToken : undefined
 
-    if (tt !== null && typeof tt !== 'undefined' && at !== null && typeof at !== 'undefined') {
-      headers['Authorization'] = tt + ' ' + at
+    if (tokenType !== null && typeof tokenType !== 'undefined' && accessToken !== null && typeof accessToken !== 'undefined') {
+      headers['Authorization'] = tokenType + ' ' + accessToken
     }
 
     return headers
