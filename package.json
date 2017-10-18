@@ -1,7 +1,7 @@
 {
-  "name": "restit",
+  "name": "nuclearest-js",
   "version": "0.0.1-alpha.0",
-  "description": "Javascript rest utils for galactic coders",
+  "description": "A modern Javascript rest toolbox",
   "main": "lib/index.js",
   "publishConfig": {
     "registry": "https://npm.registry.com/"
@@ -16,13 +16,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/harlott/restit.git"
+    "url": "https://github.com/harlott/nuclearest-js.git"
   },
   "keywords": [
-    "fetch",
+    "fetch", "oauth token", "refresh token"
   ],
   "author": "harlott",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.11.4",
     "babel-preset-es2015": "^6.3.13",
