@@ -1,11 +1,11 @@
-Nuclearest JS v0.0.1-alpha
+NucleaRest JS v0.0.1-alpha
 ===================
 
 
-A modern Javascript rest toolbox!
+A modern Javascript Rest API toolbox!
 ----------
 
 
-#### Why Nuclearest Js
+#### Why NucleaRest Js
 
-Nuclearest will be a set of Javascript rest utilities for SPA applications.
+NucleaRest will be a set of Javascript Rest utilities for SPA applications.
