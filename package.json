@@ -1,6 +1,6 @@
 {
   "name": "nuclearest-js",
-  "version": "0.0.1-alpha.0",
+  "version": "0.0.1-alpha",
   "description": "A modern Javascript rest toolbox",
   "main": "lib/index.js",
   "publishConfig": {
