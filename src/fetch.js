@@ -4,24 +4,51 @@ import { serverErrorResponse, isServerError } from './Utils'
 import has from 'lodash/has'
 import isFunction from 'lodash/isFunction'
 
-const isEdge = /Edge\//.test(navigator.userAgent);
-if (isEdge) window.fetch = undefined; // ensure the polyfill runs
+const isEdge = !!navigator ? /Edge\//.test(navigator.userAgent) : false;
+if (isEdge) window.fetch = undefined;
 
 import isoFetch  from 'isomorphic-fetch';
 import fetchPonyfill from 'fetch-ponyfill';
 
-const localFetch = isEdge === true ? fetchPonyfill().fetch : isoFetch
+const _fetch = isEdge === true ? fetchPonyfill().fetch : isoFetch
+/**
+ * This is a proxy method for standard fetch that use isomorphic-fetch
+ * for all human browsers and fetch-ponyfill for other cases.
+ * Features:
+ * 1) fix Edge issues with HTTP methods response headers;
+ * 2) timeout handling;
+ * 3) all the responses with no content;
+ * 4) broken server response: if the server return HTTP 503 may be you need to handle
+ *    the response without blocking the promises chain. This method force 'fetch'
+ *    to return always a JSON response.
+ *
+ * @param  {String} url     The request url
+ * @param  {Object} options The standard fetch options object
+ * @return {Promise}        Returns a promise with original fetch response in 'originalResponse' property
+ *
+ * @example
+ *
+ * fetch('/users', {
+ *      method: 'POST',
+ *      timeout: 40000,
+ *      headers: {'Content-Type': 'application/json'},
+ *      body: JSON.stringify({name: 'Jack'})
+ *    }
+ * )
+ *
+ */
 
-export default function fetch(url, options, signature, xhrOptions) {
+
+export default function fetch(url, options) {
   let resPromise = () => (new Promise((resolve, reject) => {
     let abort = false;
 
     const tm = setTimeout(function () {
       abort = true;
       resolve(serverErrorResponse);
-    }, 30000);
+    }, options.timeout || 30000);
 
-    return localFetch(url, options)
+    return _fetch(url, options)
       .then((response) => {
         clearTimeout(tm);
         return !isServerError(response) ? response : serverErrorResponse;
