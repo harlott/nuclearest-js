@@ -1,7 +1,7 @@
-const Promise = require('es6-promise').Promise
-import {setRedirect} from './redirectHandler'
 import isArray from 'lodash/isArray'
 import find from 'lodash/find'
+
+const Promise = require('es6-promise').Promise
 
 
 export const ERRORS = {
@@ -59,5 +59,3 @@ export const isSuccessEmptyResponse = (response) => {
     let emptyResponse = isEmptyBody(response)
     return !serverError && emptyResponse === true && response.ok === true
 }
-
-export default Utils
