@@ -15,13 +15,15 @@ NucleaRest will be a set of Javascript Rest utilities and practices for SPA appl
 
  This is a simple proxy method for standard fetch that use [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch)
  for all human browsers and [fetch-ponyfill](https://github.com/qubyte/fetch-ponyfill) for other cases.
+
+
  **Features:**
 - fix Edge issues with HTTP methods response headers;
 - timeout handling;
 - all the responses with no content;
-- broken server response: if the server return HTTP 503 may be you need to handle
-   the response without blocking the promises chain. This method force 'fetch'
+- broken server response: if the server return HTTP 503 with HTML body may be you need to handle the response without blocking the promises chain. This method force 'fetch'
    to return always a JSON response.
+
 
 **Warnings**
 Like isomorphic-fetch, this method is added as a global, even when using fetch-ponyfill to fix edge issues.
@@ -54,6 +56,6 @@ Example:
 ```
 
 #### Next Releases
-- fetch response object: no diff  
+- fetch response object: no diff with original fetch   
 - Authentication flow with refresh token
 - Runtime Mocking System
