@@ -1,7 +1,7 @@
+const Promise = require('es6-promise').Promise
+//import {setRedirect} from './redirectHandler'
 import isArray from 'lodash/isArray'
 import find from 'lodash/find'
-
-const Promise = require('es6-promise').Promise
 
 
 export const ERRORS = {
@@ -13,14 +13,6 @@ export const serverErrorResponse = {
     ok: false,
     status: 410,
     json: {code: ERRORS.GENERIC}
-}
-
-export const getEmptyResponse = (response) => {
-    return {
-        ok: response.ok,
-        status: response.status,
-        json: () => (new Promise((resolve, reject) => (resolve({}))))
-    }
 }
 
 const getResponseHeader = (response, contentType) => {
@@ -46,16 +38,4 @@ export const isServerError = (response) => {
         return !responseIsJson(response)
     }
     return false
-}
-
-const isEmptyBody = (response) => {
-    const contentLengthHeader = getResponseHeader(response, 'Content-Length')
-    const transferEncodingHeader = getResponseHeader(response, 'Transfer-Encoding')
-    return !responseIsJson(response)
-}
-
-export const isSuccessEmptyResponse = (response) => {
-    let serverError = isServerError(response)
-    let emptyResponse = isEmptyBody(response)
-    return !serverError && emptyResponse === true && response.ok === true
 }
