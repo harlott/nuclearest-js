@@ -1,6 +1,3 @@
-import has from 'lodash/has'
-import isEmpty from 'lodash/isEmpty'
-import clone from 'lodash/clone'
 import isString from 'lodash/isString'
 import isObject from 'lodash/isObject'
 import isFunction from 'lodash/isFunction'
@@ -20,11 +17,11 @@ export const STORAGES_MAP = {
 			}
 		},
 		cookie: {
-			setValue: (method, propertyName, value, cookieExpiringDate) => {
+			setValue: (method, propertyName, propertyValue, cookieExpiringDate) => {
 				method.save(propertyName, propertyValue, { path: '/', expires: cookieExpiringDate});
 			},
 			getValue: (method, propertyName, cookieExpiringDate) => {
-			  return method.load(propertyName, { path: '/', expires: cookieExpiringDate});
+				return method.load(propertyName, { path: '/', expires: cookieExpiringDate});
 			},
 			removeValue: (method, propertyName, cookieExpiringDate) => {
 				method.removeValue(propertyName, { path: '/', expires: cookieExpiringDate});
@@ -34,37 +31,37 @@ export const STORAGES_MAP = {
 
 const checkNewStorageMap = (storageType, storageMethod) => {
 	if (!isString(storageType)){
-		return throw new Error('storageType parameter must be a string i.e: sessionStorage')
+		throw new Error('storageType parameter must be a string i.e: sessionStorage')
 	}
 	if (!isObject(storageMethod)){
-		return throw new Error('storageMethod parameter must be a object i.e: {setValue: () => {}, getValue: () => {}, removeValue: () => {}}')
+		throw new Error('storageMethod parameter must be a object i.e: {setValue: () => {}, getValue: () => {}, removeValue: () => {}}')
 	} else {
 		if (!storageMethod.setValue || !isFunction(storageMethod.setValue)){
-			return throw new Error('storageMethod parameter must have a function setValue')
+			throw new Error('storageMethod parameter must have a function setValue')
 		}
 
 		if (!storageMethod.getValue || !isFunction(storageMethod.getValue)){
-			return throw new Error('storageMethod parameter must have a function getValue')
+			throw new Error('storageMethod parameter must have a function getValue')
 		}
 
 		if (!storageMethod.removeValue || !isFunction(storageMethod.removeValue)){
-			return throw new Error('storageMethod parameter must have a function removeValue')
+			throw new Error('storageMethod parameter must have a function removeValue')
 		}
 	}
 }
 
-export const buildNewStorageMap(storageType, storageMethod){
-	checkNewStorage(storageType, storageMethod)
+export const buildNewStorageMap = (storageType, storageMethod) => {
+	checkNewStorageMap(storageType, storageMethod)
 	let _storageMap = cloneDeep(STORAGES_MAP)
 	let _storageMapMethod = cloneDeep(storageMethod)
-	_storageMap[_storagetype] = _storageMapMethod
+	_storageMap[storageType] = _storageMapMethod
 	return _storageMap
 }
 
 class Storage{
 	constructor(storageType, storageMethod, storagesMap){
-		this.STORAGE_TYPE = sessionType
-		this.STORAGE_METHOD = sessionMethod
+		this.STORAGE_TYPE = storageType
+		this.STORAGE_METHOD = storageMethod
 		this.STORAGES_MAP = storagesMap || STORAGES_MAP
 	}
 
