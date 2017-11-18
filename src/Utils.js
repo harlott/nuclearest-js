@@ -1,9 +1,3 @@
-const Promise = require('es6-promise').Promise
-//import {setRedirect} from './redirectHandler'
-import isArray from 'lodash/isArray'
-import find from 'lodash/find'
-
-
 export const ERRORS = {
     GENERIC: 'GENERIC_SERVER_ERROR',
     TIMEOUT: 'ERROR_TIMEOUT'
@@ -25,7 +19,7 @@ const getResponseHeader = (response, contentType) => {
 
 const responseIsJson = (response) => {
     let contentTypeHeader = getResponseHeader(response, 'Content-Type')
-    if (!!contentTypeHeader) {
+    if (contentTypeHeader === true) {
         if (contentTypeHeader.indexOf('application/json') > -1) {
             return true
         }

@@ -1,11 +1,12 @@
 const Promise = require('es6-promise').Promise;
 
 import { serverErrorResponse, isServerError } from './Utils'
-import has from 'lodash/has'
 import isFunction from 'lodash/isFunction'
+import get from 'lodash/get'
 
-const isEdge = !!navigator ? /Edge\//.test(navigator.userAgent) : false;
-if (isEdge) window.fetch = undefined;
+const userAgent = get(navigator, 'userAgent')
+const isEdge =  /Edge\//.test(userAgent)
+if (isEdge) window.fetch = undefined
 
 import isoFetch  from 'isomorphic-fetch';
 import fetchPonyfill from 'fetch-ponyfill';
@@ -40,7 +41,7 @@ const _fetch = isEdge === true ? fetchPonyfill().fetch : isoFetch
 
 
 export default function fetch(url, options) {
-  let resPromise = () => (new Promise((resolve, reject) => {
+  let resPromise = () => (new Promise((resolve) => {
     let abort = false;
 
     const tm = setTimeout(function () {
@@ -77,11 +78,12 @@ export default function fetch(url, options) {
                     originalResponse: response,
                 })
             }, (err) => {
-              console.error("Error on converting from response into jSON", err);
+              if (err){
+                  throw new Error("Error on converting from response into jSON:  ", err.stack)
+              }
               return resolve(serverErrorResponse)
             });
           } else {
-            console.error("Generic Error on response");
             return resolve(serverErrorResponse )
           }
 
