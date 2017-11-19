@@ -3,30 +3,29 @@ import isObject from 'lodash/isObject'
 import isFunction from 'lodash/isFunction'
 import cloneDeep from 'lodash/cloneDeep'
 
-
 export const STORAGES_MAP = {
-		storage: {
-			setValue: (method, propertyName, value) => {
-				method.setItem(propertyName, JSON.stringify(value))
-			},
-			getValue: (method, propertyName) => {
-				return method.getItem(propertyName)
-			},
-			removeValue: (method, propertyName) => {
-				method.removeItem(propertyName)
-			}
+	storage: {
+		setValue: (method, propertyName, value) => {
+			method.setItem(propertyName, JSON.stringify(value))
 		},
-		cookie: {
-			setValue: (method, propertyName, propertyValue, cookieExpiringDate) => {
-				method.save(propertyName, propertyValue, { path: '/', expires: cookieExpiringDate});
-			},
-			getValue: (method, propertyName, cookieExpiringDate) => {
-				return method.load(propertyName, { path: '/', expires: cookieExpiringDate});
-			},
-			removeValue: (method, propertyName, cookieExpiringDate) => {
-				method.removeValue(propertyName, { path: '/', expires: cookieExpiringDate});
-			}
+		getValue: (method, propertyName) => {
+			return method.getItem(propertyName)
+		},
+		removeValue: (method, propertyName) => {
+			method.removeItem(propertyName)
 		}
+	},
+	cookie: {
+		setValue: (method, propertyName, propertyValue, cookieExpiringDate) => {
+			method.save(propertyName, propertyValue, { path: '/', expires: cookieExpiringDate});
+		},
+		getValue: (method, propertyName, cookieExpiringDate) => {
+			return method.load(propertyName, { path: '/', expires: cookieExpiringDate});
+		},
+		removeValue: (method, propertyName, cookieExpiringDate) => {
+			method.removeValue(propertyName, { path: '/', expires: cookieExpiringDate});
+		}
+	}
 }
 
 const checkCustomStorageMap = (storageType, storage) => {
@@ -37,15 +36,15 @@ const checkCustomStorageMap = (storageType, storage) => {
 		throw new Error('storage parameter must be a object i.e: {setValue: () => {}, getValue: () => {}, removeValue: () => {}}')
 	} else {
 		if (!storage.setValue || !isFunction(storage.setValue)){
-			throw new Error('storageMethod parameter must have a function setValue')
+			throw new Error('storage parameter must have a function setValue')
 		}
 
 		if (!storage.getValue || !isFunction(storage.getValue)){
-			throw new Error('storageMethod parameter must have a function getValue')
+			throw new Error('storage parameter must have a function getValue')
 		}
 
 		if (!storage.removeValue || !isFunction(storage.removeValue)){
-			throw new Error('storageMethod parameter must have a function removeValue')
+			throw new Error('storage parameter must have a function removeValue')
 		}
 	}
 }
