@@ -29,40 +29,40 @@ export const STORAGES_MAP = {
 		}
 }
 
-const checkNewStorageMap = (storageType, storageMethod) => {
+const checkCustomStorageMap = (storageType, storage) => {
 	if (!isString(storageType)){
 		throw new Error('storageType parameter must be a string i.e: sessionStorage')
 	}
-	if (!isObject(storageMethod)){
-		throw new Error('storageMethod parameter must be a object i.e: {setValue: () => {}, getValue: () => {}, removeValue: () => {}}')
+	if (!isObject(storage)){
+		throw new Error('storage parameter must be a object i.e: {setValue: () => {}, getValue: () => {}, removeValue: () => {}}')
 	} else {
-		if (!storageMethod.setValue || !isFunction(storageMethod.setValue)){
+		if (!storage.setValue || !isFunction(storage.setValue)){
 			throw new Error('storageMethod parameter must have a function setValue')
 		}
 
-		if (!storageMethod.getValue || !isFunction(storageMethod.getValue)){
+		if (!storage.getValue || !isFunction(storage.getValue)){
 			throw new Error('storageMethod parameter must have a function getValue')
 		}
 
-		if (!storageMethod.removeValue || !isFunction(storageMethod.removeValue)){
+		if (!storage.removeValue || !isFunction(storage.removeValue)){
 			throw new Error('storageMethod parameter must have a function removeValue')
 		}
 	}
 }
 
-export const buildNewStorageMap = (storageType, storageMethod) => {
-	checkNewStorageMap(storageType, storageMethod)
+export const buildCustomStorageMap = (storageType, storage) => {
+	checkCustomStorageMap(storageType, storage)
 	let _storageMap = cloneDeep(STORAGES_MAP)
-	let _storageMapMethod = cloneDeep(storageMethod)
-	_storageMap[storageType] = _storageMapMethod
+	let _storage = cloneDeep(storage)
+	_storageMap[storageType] = _storage
 	return _storageMap
 }
 
 class Storage{
-	constructor(storageType, storageMethod, storagesMap){
+	constructor(storageType, storage, storagesMap){
 		this.STORAGE_TYPE = storageType
-		this.STORAGE_METHOD = storageMethod
-		this.STORAGES_MAP = storagesMap || STORAGES_MAP
+		this.STORAGE = cloneDeep(storage)
+		this.STORAGES_MAP = cloneDeep(storagesMap) || cloneDeep(STORAGES_MAP)
 	}
 
 	getCookieExp(){
@@ -75,19 +75,19 @@ class Storage{
 	}
 
 	getMethod(){
-		return this.STORAGE_METHOD
+		return THIS.STORAGE
 	}
 
   setValue(propertyName, propertyValue){
-		this.STORAGES_MAP[this.STORAGE_TYPE].setValue(this.STORAGE_METHOD, propertyName, propertyValue, this.getCookieExp())
+		this.STORAGES_MAP[this.STORAGE_TYPE].setValue(THIS.STORAGE, propertyName, propertyValue, this.getCookieExp())
 	}
 
 	getValue(propertyName){
-		return this.STORAGES_MAP[this.STORAGE_TYPE].getValue(this.STORAGE_METHOD, propertyName, this.getCookieExp())
+		return this.STORAGES_MAP[this.STORAGE_TYPE].getValue(THIS.STORAGE, propertyName, this.getCookieExp())
 	}
 
 	removeValue(propertyName){
-		this.STORAGES_MAP[this.STORAGE_TYPE].removeValue(this.STORAGE_METHOD, propertyName, this.getCookieExp())
+		this.STORAGES_MAP[this.STORAGE_TYPE].removeValue(THIS.STORAGE, propertyName, this.getCookieExp())
 	}
 }
 
