@@ -5,52 +5,52 @@ import cloneDeep from 'lodash/cloneDeep'
 
 export const STORAGES_MAP = {
 	storage: {
-		setValue: (method, propertyName, value) => {
-			method.setItem(propertyName, JSON.stringify(value))
+		setValue: (storage, propertyName, value) => {
+			storage.setItem(propertyName, JSON.stringify(value))
 		},
-		getValue: (method, propertyName) => {
-			return method.getItem(propertyName)
+		getValue: (storage, propertyName) => {
+			return storage.getItem(propertyName)
 		},
-		removeValue: (method, propertyName) => {
-			method.removeItem(propertyName)
+		removeValue: (storage, propertyName) => {
+			storage.removeItem(propertyName)
 		}
 	},
 	cookie: {
-		setValue: (method, propertyName, propertyValue, cookieExpiringDate) => {
-			method.save(propertyName, propertyValue, { path: '/', expires: cookieExpiringDate});
+		setValue: (storage, propertyName, propertyValue, cookieExpiringDate) => {
+			storage.save(propertyName, propertyValue, { path: '/', expires: cookieExpiringDate});
 		},
-		getValue: (method, propertyName, cookieExpiringDate) => {
-			return method.load(propertyName, { path: '/', expires: cookieExpiringDate});
+		getValue: (storage, propertyName, cookieExpiringDate) => {
+			return storage.load(propertyName, { path: '/', expires: cookieExpiringDate});
 		},
-		removeValue: (method, propertyName, cookieExpiringDate) => {
-			method.removeValue(propertyName, { path: '/', expires: cookieExpiringDate});
+		removeValue: (storage, propertyName, cookieExpiringDate) => {
+			storage.removeValue(propertyName, { path: '/', expires: cookieExpiringDate});
 		}
 	}
 }
 
-const checkCustomStorageMap = (storageType, storage) => {
+const checkCustomStorage = (storageType, storage) => {
 	if (!isString(storageType)){
 		throw new Error('storageType parameter must be a string i.e: sessionStorage')
 	}
 	if (!isObject(storage)){
 		throw new Error('storage parameter must be a object i.e: {setValue: () => {}, getValue: () => {}, removeValue: () => {}}')
 	} else {
-		if (!storage.setValue || !isFunction(storage.setValue)){
+		if (!isFunction(get(storage, 'setValue'))){
 			throw new Error('storage parameter must have a function setValue')
 		}
 
-		if (!storage.getValue || !isFunction(storage.getValue)){
+		if (!isFunction(get(storage, 'getValue'))){
 			throw new Error('storage parameter must have a function getValue')
 		}
+		if (!isFunction(get(storage, 'removeValue'))){
 
-		if (!storage.removeValue || !isFunction(storage.removeValue)){
 			throw new Error('storage parameter must have a function removeValue')
 		}
 	}
 }
 
-export const buildCustomStorageMap = (storageType, storage) => {
-	checkCustomStorageMap(storageType, storage)
+export const buildCustomStoragesMap = (storageType, storage) => {
+	checkCustomStorage(storageType, storage)
 	let _storageMap = cloneDeep(STORAGES_MAP)
 	let _storage = cloneDeep(storage)
 	_storageMap[storageType] = _storage
@@ -77,7 +77,7 @@ class Storage{
 		return THIS.STORAGE
 	}
 
-  setValue(propertyName, propertyValue){
+	setValue(propertyName, propertyValue){
 		this.STORAGES_MAP[this.STORAGE_TYPE].setValue(THIS.STORAGE, propertyName, propertyValue, this.getCookieExp())
 	}
 
