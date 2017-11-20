@@ -2,6 +2,7 @@ import isString from 'lodash/isString'
 import isObject from 'lodash/isObject'
 import isFunction from 'lodash/isFunction'
 import cloneDeep from 'lodash/cloneDeep'
+import get from 'lodash/get'
 
 export const STORAGES_MAP = {
     storage: {
@@ -51,8 +52,8 @@ const checkCustomStorage = (storageType, storage) => {
         if (!isFunction(get(storage, 'getValue'))) {
             throw new Error('storage parameter must have a function getValue')
         }
-        if (!isFunction(get(storage, 'removeValue'))) {
 
+        if (!isFunction(get(storage, 'removeValue'))) {
             throw new Error('storage parameter must have a function removeValue')
         }
     }
@@ -83,19 +84,19 @@ class Storage {
     }
 
     getMethod() {
-        return THIS.STORAGE
+        return this.STORAGE
     }
 
     setValue(propertyName, propertyValue) {
-        this.STORAGES_MAP[this.STORAGE_TYPE].setValue(THIS.STORAGE, propertyName, propertyValue, this.getCookieExp())
+        this.STORAGES_MAP[this.STORAGE_TYPE].setValue(this.STORAGE, propertyName, propertyValue, this.getCookieExp())
     }
 
     getValue(propertyName) {
-        return this.STORAGES_MAP[this.STORAGE_TYPE].getValue(THIS.STORAGE, propertyName, this.getCookieExp())
+        return this.STORAGES_MAP[this.STORAGE_TYPE].getValue(this.STORAGE, propertyName, this.getCookieExp())
     }
 
     removeValue(propertyName) {
-        this.STORAGES_MAP[this.STORAGE_TYPE].removeValue(THIS.STORAGE, propertyName, this.getCookieExp())
+        this.STORAGES_MAP[this.STORAGE_TYPE].removeValue(this.STORAGE, propertyName, this.getCookieExp())
     }
 }
 
