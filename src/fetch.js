@@ -1,8 +1,9 @@
-const Promise = require('es6-promise').Promise;
-
-import { serverErrorResponse, isServerError } from './Utils'
 import isFunction from 'lodash/isFunction'
 import get from 'lodash/get'
+
+import { serverErrorResponse, isServerError } from './Utils'
+
+const Promise = require('es6-promise').Promise;
 
 const userAgent = get(navigator, 'userAgent')
 const isEdge =  /Edge\//.test(userAgent)
@@ -12,6 +13,7 @@ import isoFetch  from 'isomorphic-fetch';
 import fetchPonyfill from 'fetch-ponyfill';
 
 const _fetch = isEdge === true ? fetchPonyfill().fetch : isoFetch
+
 /**
  * This is a proxy method for standard fetch that use isomorphic-fetch
  * for all human browsers and fetch-ponyfill for other cases.
@@ -40,7 +42,7 @@ const _fetch = isEdge === true ? fetchPonyfill().fetch : isoFetch
  */
 
 
-export default function fetch(url, options) {
+const fetch = (url, options) => {
   let resPromise = () => (new Promise((resolve) => {
     let abort = false;
 
@@ -86,10 +88,11 @@ export default function fetch(url, options) {
           } else {
             return resolve(serverErrorResponse )
           }
-
         }
       })
   }));
 
     return resPromise()
 }
+
+export default fetch
