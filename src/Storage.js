@@ -48,10 +48,10 @@ export const STORAGES_MAP = {
 }
 
 /**
- * checkCustomStorage validate the shape of a custom storage
- * @param  {String} storageType The type of storage; i.e: sessionStorage
+ * Validate the shape of a custom storage object
+ * @param  {string} storageType The type of storage; i.e: sessionStorage
  * @param  {Object} storage     The custom storage map: i.e: {setValue: () => {}, getValue: () => {}, removeValue: () => {}}
- *
+ * @return {Boolean}            return true if valid
  */
 const checkCustomStorage = (storageType, storage) => {
     if (!isString(storageType)) {
@@ -72,32 +72,36 @@ const checkCustomStorage = (storageType, storage) => {
             throw new Error('storage parameter must have a function removeValue')
         }
     }
+    return true
 }
 /**
- * buildCustomStorage build the custom storage map
- * @param  {String} type                The type of storage; i.e: sessionStorage
- * @param  {Function} setValueMethod    The function to set value in the storage
- * @param  {Function} getValueMethod    The function to get value in the storage
- * @param  {Function} removeValueMethod The function to remove value in the storage
- * @return {Object}                     The custom storage map
+ * Build a custom storage object
+ * @param  {string} type          The type of storage; i.e: tvFileSystem
+ * @param  {Function} setValue    The function to set value in the storage
+ * @param  {Function} getValue    The function to get value in the storage
+ * @param  {Function} removeValue The function to remove value in the storage
+ * @return {Object}               The custom storage map
  */
-export const buildCustomStorage = (type, setValueMethod, getValueMethod, removeValueMethod) => {
+export const buildCustomStorage = (type, setValue, getValue, removeValue) => {
   let _storage = {}
   _storage[type] = {
-    setValue: setValueMethod,
-    getValue: getValueMethod,
-    removeValue: removeValueMethod
+    setValue: setValue,
+    getValue: getValue,
+    removeValue: removeValue
   }
   checkCustomStorage(type, _storage)
   return _storage
 }
 /**
- * buildCustomStoragesMap build new Storages Map adding custom storages
- * @param  {[type]} storageType [description]
+ * Build new Storages Map adding custom storages
+ * @param  {string} storageType [description]
  * @param  {[type]} storage     [description]
  * @return {[type]}             [description]
  */
 export const buildCustomStoragesMap = (storageType, storage) => {
+    if (STORAGES_MAP[storageType] !== undefined){
+      console.warn('storageType is already defined! Its value will be overwrited!')
+    }
     checkCustomStorage(storageType, storage)
     let _storageMap = cloneDeep(STORAGES_MAP)
     let _storage = cloneDeep(storage)
