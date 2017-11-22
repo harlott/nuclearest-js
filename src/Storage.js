@@ -10,7 +10,7 @@ export const STORAGE_TYPES = {
 }
 
 /**
- * STORAGES_MAP is a simple interface for WebStorages
+ * The storages map that implements the WebStorage
  * @type {Object}
  */
 export const STORAGES_MAP = {
@@ -51,7 +51,7 @@ export const STORAGES_MAP = {
  * Validate the shape of a custom storage object
  * @param  {string} storageType The type of storage; i.e: sessionStorage
  * @param  {Object} storage     The custom storage map: i.e: {setValue: () => {}, getValue: () => {}, removeValue: () => {}}
- * @return {Boolean}            return true if valid
+ * @return {boolean}            return true if valid
  */
 const checkCustomStorage = (storageType, storage) => {
     if (!isString(storageType)) {
@@ -92,11 +92,12 @@ export const buildCustomStorage = (type, setValue, getValue, removeValue) => {
   checkCustomStorage(type, _storage)
   return _storage
 }
+
 /**
  * Build new Storages Map adding custom storages
- * @param  {string} storageType [description]
- * @param  {[type]} storage     [description]
- * @return {[type]}             [description]
+ * @param  {string} storageType The type of storage; i.e: tvFileSystem
+ * @param  {Object} storage     The new storage object
+ * @return {Object}             The new storages map
  */
 export const buildCustomStoragesMap = (storageType, storage) => {
     if (STORAGES_MAP[storageType] !== undefined){
@@ -108,7 +109,10 @@ export const buildCustomStoragesMap = (storageType, storage) => {
     _storageMap[storageType] = _storage
     return _storageMap
 }
-
+/**
+ * This is a simple interface for WebStorages
+ * @type {[type]}
+ */
 class Storage {
     constructor(storageType, storage, storagesMap) {
         this.STORAGE_TYPE = storageType
@@ -129,16 +133,16 @@ class Storage {
         return this.STORAGE
     }
 
-    setValue(propertyName, propertyValue) {
-        this.STORAGES_MAP[this.STORAGE_TYPE].setValue(this.STORAGE, propertyName, propertyValue, this.getCookieExp())
+    setValue(propertyName, propertyValue, cookieExpDate) {
+        this.STORAGES_MAP[this.STORAGE_TYPE].setValue(this.STORAGE, propertyName, propertyValue, cookieExpDate || this.getCookieExp())
     }
 
-    getValue(propertyName) {
-        return this.STORAGES_MAP[this.STORAGE_TYPE].getValue(this.STORAGE, propertyName, this.getCookieExp())
+    getValue(propertyName, cookieExpDate) {
+        return this.STORAGES_MAP[this.STORAGE_TYPE].getValue(this.STORAGE, propertyName, cookieExpDate || this.getCookieExp())
     }
 
-    removeValue(propertyName) {
-        this.STORAGES_MAP[this.STORAGE_TYPE].removeValue(this.STORAGE, propertyName, this.getCookieExp())
+    removeValue(propertyName, cookieExpDate) {
+        this.STORAGES_MAP[this.STORAGE_TYPE].removeValue(this.STORAGE, propertyName, cookieExpDate || this.getCookieExp())
     }
 }
 
