@@ -1,23 +1,23 @@
-import assert from 'assert'
 import { buildCustomStorage } from '../src/Storage'
 import { buildCustomStoragesMap } from '../src/Storage'
 
+const expect = require('chai').expect
 
 describe('Storage', function() {
+  let newStorage = buildCustomStorage('fileSystem', ()=>{}, ()=>{}, ()=>{})
   describe('#buildCustomStorage()', function() {
     it('should build the custom storage', function() {
-        let newStorage = buildCustomStorage('fileSystem', ()=>{}, ()=>{}, ()=>{})
-        assert.equal(newStorage, {'fileSystem':{setValue: () =>{}, getValue: ()=>{}, removeValue: ()=>{}}})
+        expect(newStorage).to.have.property('fileSystem')
+        expect(newStorage.fileSystem).to.have.property('setValue')
+        expect(newStorage.fileSystem.setValue).to.be.a('function')
     });
   });
   describe('#buildCustomStoragesMap()', function() {
-    it('should not pass with bad parameters', function() {
-      try{
-          let newStorage = buildCustomStoragesMap('fileSystem', {setVale:()=>{}, getValue: ()=>{}, removeValue: ()=>{}})
-      } catch(e){
-        console.log(e)
-      }
-
+    let customStoragesMap = buildCustomStoragesMap('fileSystem', newStorage)
+    it('should build the custom storage map', function() {
+        expect(customStoragesMap).to.have.property('fileSystem')
+        expect(customStoragesMap).to.have.property('cookie')
+        expect(customStoragesMap.fileSystem.setValue).to.be.a('function')
     });
   });
 });

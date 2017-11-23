@@ -3,6 +3,7 @@ import isObject from 'lodash/isObject'
 import isFunction from 'lodash/isFunction'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
+import merge from 'lodash/merge'
 
 export const STORAGE_TYPES = {
   'LOCAL_STORAGE': 'storage',
@@ -48,33 +49,6 @@ export const STORAGES_MAP = {
 }
 
 /**
- * Validate the shape of a custom storage object
- * @param  {string} storageType The type of storage; i.e: sessionStorage
- * @param  {Object} storage     The custom storage map: i.e: {setValue: () => {}, getValue: () => {}, removeValue: () => {}}
- * @return {boolean}            return true if valid
- */
-const checkCustomStorage = (storageType, storage) => {
-    if (!isString(storageType)) {
-        throw new Error('storageType parameter must be a string i.e: sessionStorage')
-    }
-    if (!isObject(storage)) {
-        throw new Error('storage parameter must be a object i.e: {setValue: () => {}, getValue: () => {}, removeValue: () => {}}')
-    } else {
-        if (!isFunction(get(storage[storageType], 'setValue'))) {
-            throw new Error('storage parameter must have a function setValue')
-        }
-
-        if (!isFunction(get(storage[storageType], 'getValue'))) {
-            throw new Error('storage parameter must have a function getValue')
-        }
-
-        if (!isFunction(get(storage[storageType], 'removeValue'))) {
-            throw new Error('storage parameter must have a function removeValue')
-        }
-    }
-    return true
-}
-/**
  * Build a custom storage object
  * @param  {string} type          The type of storage; i.e: tvFileSystem
  * @param  {Function} setValue    The function to set value in the storage
@@ -89,7 +63,6 @@ export const buildCustomStorage = (type, setValue, getValue, removeValue) => {
     getValue: getValue,
     removeValue: removeValue
   }
-  checkCustomStorage(type, _storage)
   return _storage
 }
 
@@ -103,10 +76,9 @@ export const buildCustomStoragesMap = (storageType, storage) => {
     if (STORAGES_MAP[storageType] !== undefined){
       console.warn('storageType is already defined! Its value will be overwrited!')
     }
-    checkCustomStorage(storageType, storage)
     let _storageMap = cloneDeep(STORAGES_MAP)
     let _storage = cloneDeep(storage)
-    _storageMap[storageType] = _storage
+    merge(_storageMap, _storage)
     return _storageMap
 }
 /**
