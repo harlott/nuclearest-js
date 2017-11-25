@@ -11,6 +11,21 @@ const STORAGE_TYPES = {
   'COOKIE': 'cookie'
 }
 
+export const canUseStorage = (storageType, storage) => {
+    let testKey = 'test'
+    let _storage = new Storage(storageType, storage)
+    try
+    {
+        _storage.setValue(testKey, '1');
+        _storage.removeValue(testKey);
+        return true
+    }
+    catch (error)
+    {
+        return false;
+    }
+}
+
 /**
  * The storages map that implements the WebStorage
  * @type {Object}

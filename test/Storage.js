@@ -1,6 +1,4 @@
-import { buildCustomStorage } from '../src/Storage'
-import { buildCustomStoragesMap } from '../src/Storage'
-import Storage from '../src/Storage'
+import Storage, { canUseStorage, buildCustomStorage, buildCustomStoragesMap } from '../src/Storage'
 
 const expect = require('chai').expect
 let __global__ = {}
@@ -19,6 +17,7 @@ describe('Storage', function() {
         expect(newStorage.fileSystem.setValue).to.be.a('function')
     });
   });
+
   describe('#buildCustomStoragesMap()', function() {
     it('should build the custom storage map', function() {
         expect(customStoragesMap).to.have.property('fileSystem')
@@ -26,14 +25,21 @@ describe('Storage', function() {
         expect(customStoragesMap.fileSystem.setValue).to.be.a('function')
     });
   });
+
   describe('#StorageInstance', function(){
     let storage = new Storage('fileSystem', undefined, customStoragesMap)
+    it('should check storage', function(){
+      expect(Storage.getTypesMap()).to.have.all.keys('LOCAL_STORAGE', 'SESSION_STORAGE', 'COOKIE')
+    })
+
     it('should get the types map', function(){
       expect(Storage.getTypesMap()).to.have.all.keys('LOCAL_STORAGE', 'SESSION_STORAGE', 'COOKIE')
     })
+
     it('should add custom storage to Storage instance', function(){
       expect(storage.STORAGES_MAP).to.have.property('fileSystem')
     })
+
     it('should set and get a value', function(){
       storage.setValue('a', 1)
       expect(storage.getValue('a')).to.be.a('number')
