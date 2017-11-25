@@ -5,12 +5,22 @@ const STORAGE_TYPES = {
   'STORAGE': 'storage',
   'COOKIE': 'cookie'
 }
-
+/**
+ * This method check if storage is disabled and catch the exception.
+ * Useful for safari private browsing or browser storage disabled.
+ * Check custom storage implementation too.
+ *
+ * @param  {string} storageType             The type of storage; i.e: STORAGE_TYPES.STORAGE or 'tvFileSystem'
+ * @param  {object} storage                 The storage you want to use i.e window.cookie or window.localStorage
+ * @param  {STORAGES_MAP} customStoragesMap The custom storages map
+ * @return {boolean}                        return true if storage is enabled or custom storage is correctly implemented
+ */
 export const canUseStorage = (storageType, storage, customStoragesMap) => {
     let key = 'test'
     try {
         let _storage = customStoragesMap[storageType] || STORAGES_MAP[storageType]
         _storage.setValue(key, '1', storage);
+        _storage.getValue(key, storage);
         _storage.removeValue(key, storage);
         return true
     } catch (error) {
@@ -101,7 +111,7 @@ class Storage {
     static getTypesMap(){
       return STORAGE_TYPES
     }
-    
+
     getCookieExp() {
         var now = new Date();
         return new Date(now.getFullYear(), now.getMonth() + 6, now.getDate());
