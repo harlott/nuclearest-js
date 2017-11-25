@@ -15,13 +15,14 @@ const STORAGE_TYPES = {
  * @param  {STORAGES_MAP} customStoragesMap The custom storages map
  * @return {boolean}                        return true if storage is enabled or custom storage is correctly implemented
  */
+
 export const canUseStorage = (storageType, storage, customStoragesMap) => {
     let key = 'test'
     try {
         let _storage = customStoragesMap[storageType] || STORAGES_MAP[storageType]
-        _storage.setValue(key, '1', storage);
-        _storage.getValue(key, storage);
-        _storage.removeValue(key, storage);
+        _storage.setItem(key, '1', storage);
+        _storage.getItem(key, storage);
+        _storage.removeItem(key, storage);
         return true
     } catch (error) {
         return false;
@@ -34,30 +35,30 @@ export const canUseStorage = (storageType, storage, customStoragesMap) => {
  */
 export const STORAGES_MAP = {
     storage: {
-        setValue: (propertyName, value, storage) => {
+        setItem: (propertyName, value, storage) => {
             storage.setItem(propertyName, JSON.stringify(value))
         },
-        getValue: (propertyName, storage) => {
+        getItem: (propertyName, storage) => {
             return storage.getItem(propertyName)
         },
-        removeValue: (propertyName, storage) => {
+        removeItem: (propertyName, storage) => {
             storage.removeItem(propertyName)
         }
     },
     cookie: {
-        setValue: (propertyName, value, cookieExpiringDate, storage) => {
+        setItem: (propertyName, value, cookieExpiringDate, storage) => {
             storage.save(propertyName, value, {
                 path: '/',
                 expires: cookieExpiringDate
             });
         },
-        getValue: (propertyName, cookieExpiringDate, storage) => {
+        getItem: (propertyName, cookieExpiringDate, storage) => {
             return storage.load(propertyName, {
                 path: '/',
                 expires: cookieExpiringDate
             });
         },
-        removeValue: (propertyName, cookieExpiringDate, storage) => {
+        removeItem: (propertyName, cookieExpiringDate, storage) => {
             storage.removeValue(propertyName, {
                 path: '/',
                 expires: cookieExpiringDate
@@ -69,17 +70,17 @@ export const STORAGES_MAP = {
 /**
  * Build a custom storage object
  * @param  {string} type          The type of storage; i.e: tvFileSystem
- * @param  {Function} setValue    The function to set value in the storage
- * @param  {Function} getValue    The function to get value in the storage
- * @param  {Function} removeValue The function to remove value in the storage
+ * @param  {Function} setItem    The function to set value in the storage
+ * @param  {Function} getItem    The function to get value in the storage
+ * @param  {Function} removeItem The function to remove value in the storage
  * @return {Object}               The custom storage map
  */
-export const buildCustomStorage = (type, setValue, getValue, removeValue) => {
+export const buildCustomStorage = (type, setItem, getItem, removeItem) => {
   let _storage = {}
   _storage[type] = {
-    setValue: setValue,
-    getValue: getValue,
-    removeValue: removeValue
+    setItem: setItem,
+    getItem: getItem,
+    removeItem: removeItem
   }
   return _storage
 }
@@ -105,7 +106,6 @@ class Storage {
         this.STORAGE_TYPE = storageType
         this.STORAGE = cloneDeep(storage) || cloneDeep(storagesMap[storageType])
         this.STORAGES_MAP = cloneDeep(storagesMap) || cloneDeep(STORAGES_MAP)
-
     }
 
     static getTypesMap(){
@@ -125,16 +125,16 @@ class Storage {
         return this.STORAGE
     }
 
-    setValue(propertyName, propertyValue, cookieExpDate) {
-        this.STORAGES_MAP[this.STORAGE_TYPE].setValue(propertyName, propertyValue, cookieExpDate || this.getCookieExp(), this.STORAGE)
+    setItem(propertyName, propertyValue, cookieExpDate) {
+        this.STORAGES_MAP[this.STORAGE_TYPE].setItem(propertyName, propertyValue, cookieExpDate || this.getCookieExp(), this.STORAGE)
     }
 
-    getValue(propertyName, cookieExpDate) {
-        return this.STORAGES_MAP[this.STORAGE_TYPE].getValue(propertyName, cookieExpDate || this.getCookieExp(), this.STORAGE)
+    getItem(propertyName, cookieExpDate) {
+        return this.STORAGES_MAP[this.STORAGE_TYPE].getItem(propertyName, cookieExpDate || this.getCookieExp(), this.STORAGE)
     }
 
-    removeValue(propertyName, cookieExpDate) {
-        this.STORAGES_MAP[this.STORAGE_TYPE].removeValue(propertyName, cookieExpDate || this.getCookieExp(), this.STORAGE)
+    removeItem(propertyName, cookieExpDate) {
+        this.STORAGES_MAP[this.STORAGE_TYPE].removeItem(propertyName, cookieExpDate || this.getCookieExp(), this.STORAGE)
     }
 }
 

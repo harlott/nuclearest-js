@@ -9,12 +9,12 @@ describe('Storage', function() {
   describe('#buildCustomStorage()', function() {
     it('should build the custom storage', function() {
         expect(newStorage).to.have.property('fileSystem')
-        expect(newStorage.fileSystem).to.have.property('setValue')
-        expect(newStorage.fileSystem.setValue).to.be.a('function')
-        expect(newStorage.fileSystem).to.have.property('getValue')
-        expect(newStorage.fileSystem.setValue).to.be.a('function')
-        expect(newStorage.fileSystem).to.have.property('removeValue')
-        expect(newStorage.fileSystem.setValue).to.be.a('function')
+        expect(newStorage.fileSystem).to.have.property('setItem')
+        expect(newStorage.fileSystem.setItem).to.be.a('function')
+        expect(newStorage.fileSystem).to.have.property('getItem')
+        expect(newStorage.fileSystem.getItem).to.be.a('function')
+        expect(newStorage.fileSystem).to.have.property('removeItem')
+        expect(newStorage.fileSystem.setItem).to.be.a('function')
     });
   });
 
@@ -22,7 +22,7 @@ describe('Storage', function() {
     it('should build the custom storage map', function() {
         expect(customStoragesMap).to.have.property('fileSystem')
         expect(customStoragesMap).to.have.property('cookie')
-        expect(customStoragesMap.fileSystem.setValue).to.be.a('function')
+        expect(customStoragesMap.fileSystem.setItem).to.be.a('function')
     });
   });
 
@@ -56,16 +56,16 @@ describe('Storage', function() {
     })
 
     it('should set and get a value', function(){
-      storage.setValue('a', 1)
-      expect(storage.getValue('a')).to.be.a('number')
-      storage.setValue('b', 'may be the good one')
-      expect(storage.getValue('b')).to.be.equal('may be the good one')
+      storage.setItem('a', 1)
+      expect(storage.getItem('a')).to.be.a('number')
+      storage.setItem('b', 'may be the good one')
+      expect(storage.getItem('b')).to.be.equal('may be the good one')
     })
     it('should remove a value', function(){
-      storage.setValue('a', 1)
-      expect(storage.getValue('a')).to.be.a('number')
-      storage.removeValue('b')
-      expect(storage.getValue('b')).to.be.equal(undefined)
+      storage.setItem('a', 1)
+      expect(storage.getItem('a')).to.be.a('number')
+      storage.removeItem('b')
+      expect(storage.getItem('b')).to.be.equal(undefined)
     })
     it('should get the type', function(){
       expect(storage.getType()).to.be.equal('fileSystem')
