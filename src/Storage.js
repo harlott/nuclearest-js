@@ -1,27 +1,19 @@
-import isString from 'lodash/isString'
-import isObject from 'lodash/isObject'
-import isFunction from 'lodash/isFunction'
 import cloneDeep from 'lodash/cloneDeep'
-import get from 'lodash/get'
 import merge from 'lodash/merge'
 
 const STORAGE_TYPES = {
-  'LOCAL_STORAGE': 'storage',
-  'SESSION_STORAGE': 'sessionStorage',
+  'STORAGE': 'storage',
   'COOKIE': 'cookie'
 }
 
-export const canUseStorage = (storageType, storage) => {
-    let testKey = 'test'
-    let _storage = new Storage(storageType, storage)
-    try
-    {
-        _storage.setValue(testKey, '1');
-        _storage.removeValue(testKey);
+export const canUseStorage = (storageType, storage, customStoragesMap) => {
+    let key = 'test'
+    try {
+        let _storage = customStoragesMap[storageType] || STORAGES_MAP[storageType]
+        _storage.setValue(key, '1', storage);
+        _storage.removeValue(key, storage);
         return true
-    }
-    catch (error)
-    {
+    } catch (error) {
         return false;
     }
 }
@@ -43,8 +35,8 @@ export const STORAGES_MAP = {
         }
     },
     cookie: {
-        setValue: (propertyName, propertyValue, cookieExpiringDate, storage) => {
-            storage.save(propertyName, propertyValue, {
+        setValue: (propertyName, value, cookieExpiringDate, storage) => {
+            storage.save(propertyName, value, {
                 path: '/',
                 expires: cookieExpiringDate
             });
@@ -89,9 +81,6 @@ export const buildCustomStorage = (type, setValue, getValue, removeValue) => {
  * @return {Object}             The new storages map
  */
 export const buildCustomStoragesMap = (storageType, storage) => {
-    if (STORAGES_MAP[storageType] !== undefined){
-      console.warn('storageType is already defined! Its value will be overwrited!')
-    }
     let _storageMap = cloneDeep(STORAGES_MAP)
     let _storage = cloneDeep(storage)
     merge(_storageMap, _storage)
@@ -106,11 +95,13 @@ class Storage {
         this.STORAGE_TYPE = storageType
         this.STORAGE = cloneDeep(storage) || cloneDeep(storagesMap[storageType])
         this.STORAGES_MAP = cloneDeep(storagesMap) || cloneDeep(STORAGES_MAP)
+
     }
 
     static getTypesMap(){
       return STORAGE_TYPES
     }
+    
     getCookieExp() {
         var now = new Date();
         return new Date(now.getFullYear(), now.getMonth() + 6, now.getDate());

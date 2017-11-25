@@ -28,12 +28,27 @@ describe('Storage', function() {
 
   describe('#StorageInstance', function(){
     let storage = new Storage('fileSystem', undefined, customStoragesMap)
-    it('should check storage', function(){
-      expect(Storage.getTypesMap()).to.have.all.keys('LOCAL_STORAGE', 'SESSION_STORAGE', 'COOKIE')
+    it('should not check custom storage', function(){
+      let _testStorage = buildCustomStorage('disabledStorage', (p, v)=>{throw new Error('can not set')}, (p)=>{throw new Error('can not get')}, (p)=>{throw new Error('can not remove')})
+      let _testCustomStoragesMap = buildCustomStoragesMap('disabledStorage', newStorage)
+      expect(canUseStorage('disabledStorage', undefined, _testCustomStoragesMap)).to.be.equal(false)
+    })
+
+    it('should check custom storage', function(){
+      expect(canUseStorage('fileSystem', undefined, customStoragesMap)).to.be.equal(true)
+    })
+
+    it('should not check standard local storage', function(){
+      let _mockedLocalStorage = {
+        setItem: () => {throw new Error('disabled')},
+        getItem: () => {throw new Error('disabled')},
+        removeItem: () => {throw new Error('disabled')}
+      }
+      expect(canUseStorage('fileSystem', _mockedLocalStorage)).to.be.equal(false)
     })
 
     it('should get the types map', function(){
-      expect(Storage.getTypesMap()).to.have.all.keys('LOCAL_STORAGE', 'SESSION_STORAGE', 'COOKIE')
+      expect(Storage.getTypesMap()).to.have.all.keys('STORAGE', 'COOKIE')
     })
 
     it('should add custom storage to Storage instance', function(){
