@@ -5,8 +5,9 @@ import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import merge from 'lodash/merge'
 
-export const STORAGE_TYPES = {
+const STORAGE_TYPES = {
   'LOCAL_STORAGE': 'storage',
+  'SESSION_STORAGE': 'sessionStorage',
   'COOKIE': 'cookie'
 }
 
@@ -92,6 +93,9 @@ class Storage {
         this.STORAGES_MAP = cloneDeep(storagesMap) || cloneDeep(STORAGES_MAP)
     }
 
+    static getTypesMap(){
+      return STORAGE_TYPES
+    }
     getCookieExp() {
         var now = new Date();
         return new Date(now.getFullYear(), now.getMonth() + 6, now.getDate());

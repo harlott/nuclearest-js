@@ -28,6 +28,9 @@ describe('Storage', function() {
   });
   describe('#StorageInstance', function(){
     let storage = new Storage('fileSystem', undefined, customStoragesMap)
+    it('should get the types map', function(){
+      expect(Storage.getTypesMap()).to.have.all.keys('LOCAL_STORAGE', 'SESSION_STORAGE', 'COOKIE')
+    })
     it('should add custom storage to Storage instance', function(){
       expect(storage.STORAGES_MAP).to.have.property('fileSystem')
     })
@@ -49,5 +52,6 @@ describe('Storage', function() {
     it('should get the method', function(){
       expect(storage.getMethod()).to.deep.be.equal(customStoragesMap.fileSystem)
     })
+
   })
 });
