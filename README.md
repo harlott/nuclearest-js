@@ -1,4 +1,4 @@
-NucleaRest JS v0.0.1-alpha
+NucleaRest JS v0.1.0-alpha
 ===================
 
 
