@@ -1,10 +1,12 @@
 import cloneDeep from 'lodash/cloneDeep'
 import merge from 'lodash/merge'
+import get from 'lodash/get'
 
 const STORAGE_TYPES = {
   'STORAGE': 'storage',
   'COOKIE': 'cookie'
 }
+
 /**
  * This method check if storage is disabled and catch the exception.
  * Useful for safari private browsing or browser storage disabled.
@@ -87,7 +89,7 @@ export const buildCustomStorage = (type, setItem, getItem, removeItem) => {
 
 /**
  * Build new Storages Map adding custom storages
- * @param  {string} storageType The type of storage; i.e: tvFileSystem
+ * @param  {string} storageType The type of storage; i.e: 'tvFileSystem'
  * @param  {Object} storage     The new storage object
  * @return {Object}             The new storages map
  */
@@ -97,44 +99,99 @@ export const buildCustomStoragesMap = (storageType, storage) => {
     merge(_storageMap, _storage)
     return _storageMap
 }
+
+let __storage__fallback__ = {}
+const _fallbackStorageType = 'fallbackStorage'
+const _defaultFallbackStorage = buildCustomStorage(_fallbackStorageType, (p,v) => {__storage__fallback__[p] = v}, (p) => {return __storage__fallback__[p]}, (p) => {delete __storage__fallback__[p]})
+const _defaultFallbackStoragesMap = buildCustomStoragesMap(_fallbackStorageType, _defaultFallbackStorage)
+
 /**
- * This is a simple interface for WebStorages
- * @type {[type]}
+ * This is a simple interface for WebStorages.
+ * If the selected storage is disabled, Storage provides a default fallback.
+ * @type {Storage}
  */
+
 class Storage {
-    constructor(storageType, storage, storagesMap) {
+    /**
+     * Create a Storage instance
+     * @param  {string} storageType           The type of storage; i.e: 'tvFileSystem'
+     * @param  {Object} storage               The storage to use; i.e: window.cookie
+     * @param  {Object} storagesMap           The custom storage map to use
+     * @param  {[type]} customFallbackStorage [description]
+     */
+    constructor(storageType, storage, storagesMap, customFallbackStorage) {
         this.STORAGE_TYPE = storageType
-        this.STORAGE = cloneDeep(storage) || cloneDeep(storagesMap[storageType])
+        this.STORAGE = cloneDeep(get(storagesMap, storageType)) || cloneDeep(storage)
         this.STORAGES_MAP = cloneDeep(storagesMap) || cloneDeep(STORAGES_MAP)
     }
-
+    /**
+     * [getTypesMap description]
+     * @return {[type]} [description]
+     */
     static getTypesMap(){
       return STORAGE_TYPES
     }
-
+    /**
+     * [getCookieExp description]
+     * @return {[type]} [description]
+     */
     getCookieExp() {
         var now = new Date();
         return new Date(now.getFullYear(), now.getMonth() + 6, now.getDate());
     }
-
+    /**
+     * [getType description]
+     * @return {[type]} [description]
+     */
     getType() {
         return this.STORAGE_TYPE
     }
-
+    /**
+     * [getMethod description]
+     * @return {[type]} [description]
+     */
     getMethod() {
         return this.STORAGE
     }
-
+    /**
+     * [setItem description]
+     * @param {[type]} propertyName  [description]
+     * @param {[type]} propertyValue [description]
+     * @param {[type]} cookieExpDate [description]
+     */
     setItem(propertyName, propertyValue, cookieExpDate) {
-        this.STORAGES_MAP[this.STORAGE_TYPE].setItem(propertyName, propertyValue, cookieExpDate || this.getCookieExp(), this.STORAGE)
+        if (canUseStorage(this.STORAGE_TYPE, this.STORAGE, this.STORAGES_MAP) === true){
+            this.STORAGES_MAP[this.STORAGE_TYPE].setItem(propertyName, propertyValue, cookieExpDate || this.getCookieExp(), this.STORAGE)
+        } else {
+            _defaultFallbackStoragesMap[_fallbackStorageType].setItem(propertyName, propertyValue, cookieExpDate || this.getCookieExp(), this.STORAGE)
+        }
     }
-
+    /**
+     * [getItem description]
+     * @param  {[type]} propertyName  [description]
+     * @param  {[type]} cookieExpDate [description]
+     * @return {[type]}               [description]
+     */
     getItem(propertyName, cookieExpDate) {
+      if (canUseStorage(this.STORAGE_TYPE, this.STORAGE, this.STORAGES_MAP) === true){
         return this.STORAGES_MAP[this.STORAGE_TYPE].getItem(propertyName, cookieExpDate || this.getCookieExp(), this.STORAGE)
+      } else {
+        return _defaultFallbackStoragesMap[_fallbackStorageType].getItem(propertyName, cookieExpDate || this.getCookieExp(), this.STORAGE)
+      }
     }
 
+    /**
+     * [removeItem description]
+     * @param  {[type]} propertyName  [description]
+     * @param  {[type]} cookieExpDate [description]
+     * @return {[type]}               [description]
+     */
     removeItem(propertyName, cookieExpDate) {
+      if (canUseStorage(this.STORAGE_TYPE, this.STORAGE, this.STORAGES_MAP) === true){
         this.STORAGES_MAP[this.STORAGE_TYPE].removeItem(propertyName, cookieExpDate || this.getCookieExp(), this.STORAGE)
+      } else {
+        _defaultFallbackStoragesMap[_fallbackStorageType].removeItem(propertyName, cookieExpDate || this.getCookieExp(), this.STORAGE)
+      }
     }
 }
 
