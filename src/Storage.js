@@ -1,6 +1,4 @@
-import cloneDeep from 'lodash/cloneDeep'
-import merge from 'lodash/merge'
-import get from 'lodash/get'
+import { cloneDeep, merge, get, includes } from 'lodash'
 
 const STORAGE_TYPES = {
   'STORAGE': 'storage',
@@ -117,79 +115,99 @@ class Storage {
      * @param  {string} storageType           The type of storage; i.e: 'tvFileSystem'
      * @param  {Object} storage               The storage to use; i.e: window.cookie
      * @param  {Object} storagesMap           The custom storage map to use
-     * @param  {[type]} customFallbackStorage [description]
+     * @param  {Object} fallbackStorage       The fallback configuration options: i.e {'grantedProps':["selectedLanguage"], 'callbackOnDisabled': () => {alert('STORAGE DISABLED')}}.
+     *                                        Warning: if 'grantedProps' is undefined, you can't use fallback storage. Don't use authentication or other user props.
+     *                                        Fallback storage is intended only for static configurations like 'country', 'lang', 'hasAcceptedCookie'...
      */
-    constructor(storageType, storage, storagesMap, customFallbackStorage) {
+    constructor(storageType, storage, storagesMap, fallbackStorage) {
         this.STORAGE_TYPE = storageType
         this.STORAGE = cloneDeep(get(storagesMap, storageType)) || cloneDeep(storage)
         this.STORAGES_MAP = cloneDeep(storagesMap) || cloneDeep(STORAGES_MAP)
+        this.CUSTOM_FALLBACK_STORAGE = cloneDeep(fallbackStorage)
     }
     /**
-     * [getTypesMap description]
-     * @return {[type]} [description]
+     * This method return the storagesType to use on instanciating Storage
+     * @return {Map} the storagesType map
      */
     static getTypesMap(){
       return STORAGE_TYPES
     }
     /**
-     * [getCookieExp description]
-     * @return {[type]} [description]
+     * This method return the default cookieExpiringDate
+     * @return {date} default cookieExpiringDate
      */
     getCookieExp() {
         var now = new Date();
         return new Date(now.getFullYear(), now.getMonth() + 6, now.getDate());
     }
     /**
-     * [getType description]
-     * @return {[type]} [description]
+    * This method return the storageType selected
+    * @return {string} the storageType selected
      */
     getType() {
         return this.STORAGE_TYPE
     }
     /**
-     * [getMethod description]
-     * @return {[type]} [description]
+     * This method return the storage method selected; i.e: window.cookie
+     * @return {Object} the storage method selected
      */
     getMethod() {
         return this.STORAGE
     }
     /**
-     * [setItem description]
-     * @param {[type]} propertyName  [description]
-     * @param {[type]} propertyValue [description]
-     * @param {[type]} cookieExpDate [description]
+     * This method set the storage item
+     * @param {string} propertyName   the item name to set
+     * @param {*} propertyValue       the item value
+     * @param {date} [cookieExpDate]  the cookie expiring date if you want to use cookie
      */
     setItem(propertyName, propertyValue, cookieExpDate) {
         if (canUseStorage(this.STORAGE_TYPE, this.STORAGE, this.STORAGES_MAP) === true){
             this.STORAGES_MAP[this.STORAGE_TYPE].setItem(propertyName, propertyValue, cookieExpDate || this.getCookieExp(), this.STORAGE)
         } else {
+            if (!includes(get(this.CUSTOM_FALLBACK_STORAGE, 'grantedProps'), propertyName)){
+              if (get(this.CUSTOM_FALLBACK_STORAGE, 'callbackOnDisabled') !== undefined){
+                get(this.CUSTOM_FALLBACK_STORAGE, 'callbackOnDisabled')()
+              }
+              throw new Error('Cannot use property "'+propertyName+'" in fallback storage. You can use fallbackStorage "grantedProps" option to grant')
+            }
             _defaultFallbackStoragesMap[_fallbackStorageType].setItem(propertyName, propertyValue, cookieExpDate || this.getCookieExp(), this.STORAGE)
         }
     }
     /**
-     * [getItem description]
-     * @param  {[type]} propertyName  [description]
-     * @param  {[type]} cookieExpDate [description]
-     * @return {[type]}               [description]
+     * This method return the item value for item name
+     * @param  {string} propertyName  the item name
+     * @param  {date} [cookieExpDate] the cookie expiring date if you want to use cookie
+     * @return {*}                    the item value
      */
     getItem(propertyName, cookieExpDate) {
       if (canUseStorage(this.STORAGE_TYPE, this.STORAGE, this.STORAGES_MAP) === true){
         return this.STORAGES_MAP[this.STORAGE_TYPE].getItem(propertyName, cookieExpDate || this.getCookieExp(), this.STORAGE)
       } else {
+        if (!includes(get(this.CUSTOM_FALLBACK_STORAGE, 'grantedProps'), propertyName)){
+          if (get(this.CUSTOM_FALLBACK_STORAGE, 'callbackOnDisabled') !== undefined){
+            get(this.CUSTOM_FALLBACK_STORAGE, 'callbackOnDisabled')()
+          }
+          throw new Error('Cannot use property "'+propertyName+'" in fallback storage. You can use fallbackStorage "grantedProps" option to grant')
+        }
         return _defaultFallbackStoragesMap[_fallbackStorageType].getItem(propertyName, cookieExpDate || this.getCookieExp(), this.STORAGE)
       }
     }
 
     /**
-     * [removeItem description]
-     * @param  {[type]} propertyName  [description]
-     * @param  {[type]} cookieExpDate [description]
-     * @return {[type]}               [description]
+     * This method delete the item for item name
+     * @param  {string} propertyName  the item name
+     * @param  {date} [cookieExpDate] the cookie expiring date if you want to use cookie
      */
     removeItem(propertyName, cookieExpDate) {
       if (canUseStorage(this.STORAGE_TYPE, this.STORAGE, this.STORAGES_MAP) === true){
         this.STORAGES_MAP[this.STORAGE_TYPE].removeItem(propertyName, cookieExpDate || this.getCookieExp(), this.STORAGE)
       } else {
+        if (!includes(get(this.CUSTOM_FALLBACK_STORAGE, 'grantedProps'), propertyName)){
+          if (get(this.CUSTOM_FALLBACK_STORAGE, 'callbackOnDisabled') !== undefined){
+            get(this.CUSTOM_FALLBACK_STORAGE, 'callbackOnDisabled')()
+          }
+          throw new Error('Cannot use property "'+propertyName+'" in fallback storage. You can use fallbackStorage "grantedProps" option to grant')
+        }
         _defaultFallbackStoragesMap[_fallbackStorageType].removeItem(propertyName, cookieExpDate || this.getCookieExp(), this.STORAGE)
       }
     }
