@@ -2,6 +2,7 @@ import Storage, { canUseStorage, buildCustomStorage, buildCustomStoragesMap } fr
 
 const expect = require('chai').expect
 let __global__ = {}
+
 describe('Storage', function() {
   let newStorage = buildCustomStorage('fileSystem', (p, v)=>{__global__[p]=v}, (p)=>{return __global__[p]}, (p)=>{__global__[p] = undefined})
   let customStoragesMap = buildCustomStoragesMap('fileSystem', newStorage)
@@ -38,13 +39,24 @@ describe('Storage', function() {
       expect(canUseStorage('fileSystem', undefined, customStoragesMap)).to.be.equal(true)
     })
 
-    it('should not check standard local storage', function(){
+    it('should not check standard local storage disabled', function(){
       let _mockedLocalStorage = {
         setItem: () => {throw new Error('disabled')},
         getItem: () => {throw new Error('disabled')},
         removeItem: () => {throw new Error('disabled')}
       }
       expect(canUseStorage('fileSystem', _mockedLocalStorage)).to.be.equal(false)
+    })
+
+    it('should use fallback with standard local storage disabled', function(){
+      let _mockedLocalStorage = {
+        setItem: () => {throw new Error('disabled')},
+        getItem: () => {throw new Error('disabled')},
+        removeItem: () => {throw new Error('disabled')}
+      }
+      let _storageDisabled = new Storage('STORAGE', _mockedLocalStorage)
+      _storageDisabled.setItem('a', 1)
+      expect(_storageDisabled.getItem('a')).to.be.a('number')
     })
 
     it('should get the types map', function(){
@@ -61,18 +73,20 @@ describe('Storage', function() {
       storage.setItem('b', 'may be the good one')
       expect(storage.getItem('b')).to.be.equal('may be the good one')
     })
+
     it('should remove a value', function(){
       storage.setItem('a', 1)
       expect(storage.getItem('a')).to.be.a('number')
       storage.removeItem('b')
       expect(storage.getItem('b')).to.be.equal(undefined)
     })
+
     it('should get the type', function(){
       expect(storage.getType()).to.be.equal('fileSystem')
     })
+
     it('should get the method', function(){
       expect(storage.getMethod()).to.deep.be.equal(customStoragesMap.fileSystem)
     })
-
   })
 });
