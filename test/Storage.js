@@ -1,6 +1,7 @@
 import Storage, { canUseStorage, buildCustomStorage, buildCustomStoragesMap } from '../src/Storage'
 
 const expect = require('chai').expect
+const assert = require('chai').assert
 let __global__ = {}
 
 describe('Storage', function() {
@@ -48,13 +49,42 @@ describe('Storage', function() {
       expect(canUseStorage('fileSystem', _mockedLocalStorage)).to.be.equal(false)
     })
 
-    it('should use fallback with standard local storage disabled', function(){
+    it('should not use fallback with standard local storage disabled,no fallbackStorage options and no callbackOnDisabled', function(){
       let _mockedLocalStorage = {
         setItem: () => {throw new Error('disabled')},
         getItem: () => {throw new Error('disabled')},
         removeItem: () => {throw new Error('disabled')}
       }
       let _storageDisabled = new Storage('STORAGE', _mockedLocalStorage)
+      try {
+          _storageDisabled.setItem('a', 1)
+      } catch(err){
+        assert.ok(true);
+      }
+    })
+
+    it('should use callbackOnDisabled configured on standard local storage disabled', function(){
+      let _mockedLocalStorage = {
+        setItem: () => {throw new Error('disabled')},
+        getItem: () => {throw new Error('disabled')},
+        removeItem: () => {throw new Error('disabled')}
+      }
+      let _storageDisabled = new Storage('STORAGE', _mockedLocalStorage, undefined, {'callbackOnDisabled': () => {__global__['callbackOnDisabled'] = true}})
+      try {
+          _storageDisabled.setItem('a', 1)
+      } catch(err){
+        expect(__global__['callbackOnDisabled']).to.be.equal(true)
+        delete __global__['callbackOnDisabled']
+      }
+    })
+
+    it('should use fallback with standard local storage disabled and fallbackStorage option grantedProps', function(){
+      let _mockedLocalStorage = {
+        setItem: () => {throw new Error('disabled')},
+        getItem: () => {throw new Error('disabled')},
+        removeItem: () => {throw new Error('disabled')}
+      }
+      let _storageDisabled = new Storage('STORAGE', _mockedLocalStorage, undefined, {'grantedProps': ['a']})
       _storageDisabled.setItem('a', 1)
       expect(_storageDisabled.getItem('a')).to.be.a('number')
     })
@@ -72,6 +102,17 @@ describe('Storage', function() {
       expect(storage.getItem('a')).to.be.a('number')
       storage.setItem('b', 'may be the good one')
       expect(storage.getItem('b')).to.be.equal('may be the good one')
+    })
+
+    it('should set and get a value for localStorage', function(){
+      let _mockedLocalStorage = {
+        setItem: (p, v) => {__global__[p] = v},
+        getItem: (p) => {return __global__[p]},
+        removeItem: (p) => {}
+      }
+      let _storageDisabled = new Storage('STORAGE', _mockedLocalStorage, undefined)
+      storage.setItem('a', 1)
+      expect(storage.getItem('a')).to.be.a('number')
     })
 
     it('should remove a value', function(){
