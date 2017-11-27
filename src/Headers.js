@@ -41,6 +41,9 @@ class Headers {
     return headers
   }
   static addContentTypeJSON(headers) {
+    if (headers === undefined){
+      throw new Error('headers object parameter is required!')
+    }
     headers['Content-Type'] = 'application/json; charset=UTF-8'
     return headers
   }
