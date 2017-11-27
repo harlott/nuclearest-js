@@ -92,6 +92,37 @@ You can also create and use your own.
 
  ```
 
+
+#### Headers
+
+This is a simple centralized system to handle the request HTTP headers. Provide few basic methods for oauth authentication
+It does apply CXA (clientData, xhrOptionsData, authData) pattern: a web application can provide 3 types of parameters:
+
+  - clientData: handle some configurations like 'applicationId', or some default values for some properties like '{lang: 'EN'}'
+  - xhrOptionsData: handle timeout value, cors options...
+  - authData: handle authentication data like i.e. 'tokenObject: {tokenType: "Bearer", accessToken: "1111-2222-3333-4444"}'
+
+
+Example:
+
+
+
+```
+ import fetch from 'nuclearest-js/fetch'
+ import Headers from 'nuclearest-js/Headers'
+ import CLIENT_DATA from 'your/path/CLIENT_DATA'
+
+ fetch('/users', {
+     method: 'POST',
+     timeout: 40000,
+     headers: Headers.getHeadersDefault(CLIENT_DATA),
+     body: JSON.stringify({name: 'Jack'})
+   }
+ )
+
+
+```
+
 #### Next Releases
 - fetch response object: no diff with original fetch   
 - Authentication flow with refresh token

@@ -1,6 +1,6 @@
 {
   "name": "nuclearest-js",
-  "version": "0.1.0-alpha",
+  "version": "0.2.0-alpha",
   "description": "A modern Javascript rest API toolbox",
   "publishConfig": {
     "registry": "https://npm.registry.com/"
