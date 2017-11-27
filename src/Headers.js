@@ -3,10 +3,13 @@ import get from 'lodash/get'
 
 class Headers {
   static getHeadersDefault(clientData) {
-    return {
-      'Accept': 'application/json',
-      'Accept-Language': get(clientData, 'lang')
+    let headers = {
+      'Accept': 'application/json'
     }
+    if (get(clientData, 'lang') !== undefined){
+      headers['Accept-Language'] = get(clientData, 'lang')
+    }
+    return headers
   }
 
   static getHeadersWithClientAuthentication(clientData) {
@@ -16,12 +19,10 @@ class Headers {
   }
 
   static getHeadersWithBasicAuthentication(clientData, authData) {
-    let headers = cloneDeep(this.getHeadersDefault(clientData))
+    let headers = cloneDeep(this.getHeadersWithClientAuthentication(clientData))
 
-    headers['Content-Type'] = 'application/x-www-form-urlencoded'
-
-    if (authData.clientToken !== undefined) {
-      headers.Authorization = `Basic ${authData.clientToken}`
+    if (get(authData, 'clientToken') !== undefined) {
+      headers.Authorization = `Basic ${get(authData, 'clientToken')}`
     }
 
     return headers
