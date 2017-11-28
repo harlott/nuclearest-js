@@ -1,9 +1,45 @@
-import Headers from '../src/Headers'
+import Headers, {headersMap} from '../src/Headers/index.js'
 
 const expect = require('chai').expect
 const assert = require('chai').assert
 
 describe('Headers', function(){
+  describe('#default', function(){
+    it('should be return defaults', function(){
+      expect(new Headers().default()).to.be.empty
+    })
+  })
+  describe('#use()', function(){
+    it('should use custom header', function(){
+      let _headers = new Headers()
+      expect(_headers.add().custom('Accept', 'audio/base').use()).to.be.deep.equal({'Accept': 'audio/base'})
+    })
+
+    it('should use accept application json header', function(){
+      let _headers = new Headers()
+      expect(_headers.add().acceptApplicationJson().use()).to.be.deep.equal({'Accept': 'application/json'})
+    })
+
+    it('should remove accept application json header', function(){
+      expect(new Headers().add().acceptApplicationJson().remove().acceptApplicationJson().use()).to.be.empty
+    })
+
+    it('should use accept language header', function(){
+      let _langHeader = {}
+      _langHeader[headersMap.ACCEPT_LANGUAGE] = 'IT'
+      expect(new Headers().add().acceptLanguage('IT').use()).to.be.deep.equal(_langHeader)
+    })
+
+    it('should remove accept language header', function(){
+      expect(new Headers().add().acceptLanguage('IT').remove().acceptLanguage().use()).to.be.empty
+    })
+
+  })
+})
+
+/*
+describe('Headers', function(){
+
   const authKey = 'Authorization'
   const acceptKey = 'Accept'
   const acceptValue = 'application/json'
@@ -60,3 +96,6 @@ describe('Headers', function(){
     })
   })
 })
+
+
+*/
