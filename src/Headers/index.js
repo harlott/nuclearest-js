@@ -63,6 +63,11 @@ class Headers {
     return this.headers
   }
 
+  initAll(){
+    this.headers = {}
+    return this.headers
+  }
+
   acceptApplicationJson(){
     this.operation({
       header: this.headersMap.ACCEPT,
