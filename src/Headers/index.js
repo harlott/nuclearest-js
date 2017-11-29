@@ -25,7 +25,7 @@ export const headersValuesMap = HEADERS_VALUES_MAP
  *                   .custom('x-application-id', 'a1b2c3d4')
  *                   .use()
  *
- * 
+ *
  */
 class Headers {
   constructor(){
@@ -34,6 +34,29 @@ class Headers {
     this.headersMap = cloneDeep(HEADERS_MAP)
   }
 
+  /**
+   * add default headers values. initAll() must be called to delete default values.
+   *
+   * @example
+   *
+   * let headers = new Headers()
+   *     .addDefault()
+   *     .acceptApplicationJson()
+   *     .add()
+   *     .acceptLanguage(clientData.lang)
+   *     .use()
+   *
+   * //results: {'Accept': 'application/json', 'Accept-Language': 'EN'}
+   *
+   *  heders.init()
+   *
+   * //results: {'Accept': 'application/json'}
+   *
+   * headers.initAll()
+   *
+   * //results: {}
+   *
+   */
   addDefault(){
     this.operation = (obj) =>{
       this.defaults.push(obj.header)
