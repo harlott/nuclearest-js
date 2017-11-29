@@ -4,6 +4,12 @@ const expect = require('chai').expect
 const assert = require('chai').assert
 
 describe('Headers', function(){
+  let authData = {}
+  authData.clientToken = '1111'
+  authData.tokenObject = {
+    tokenType: 'Bearer',
+    accessToken: '2222'
+  }
   describe('#default', function(){
     it('should be return defaults', function(){
       expect(new Headers().default()).to.be.empty
@@ -46,7 +52,17 @@ describe('Headers', function(){
       expect(new Headers().remove().oauthClientAuthentication().use()).to.be.empty
     })
 
+    it('should use oauthBasicAuthentication header', function(){
+      expect(new Headers().add().oauthBasicAuthentication(authData).use()).to.have.property(headersMap.AUTHORIZATION).to.be.equal(`Basic ${authData.clientToken}`)
+    })
 
+    it('should oauthBasicAuthentication header not defined if authData not passed ', function(){
+      expect(new Headers().add().oauthBasicAuthentication().use()).to.not.have.property(headersMap.AUTHORIZATION)
+    })
+
+    it('should remove oauthBasicAuthentication header', function(){
+      expect(new Headers().remove().oauthBasicAuthentication().use()).to.be.empty
+    })
 
   })
 })
