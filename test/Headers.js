@@ -78,8 +78,12 @@ describe('Headers', function(){
 
     it('should add default header', function(){
       let _headers = new Headers()
-      expect(_headers.addDefault().acceptApplicationJson().use()).to.have.property(headersMap.ACCEPT)
-      _headers.add().acceptLanguage('EN')
+      _headers
+        .addDefault()
+        .acceptApplicationJson()
+        .add()
+        .acceptLanguage('EN')
+        .contentTypeJsonUtf8()
       expect(_headers.use()).to.have.property(headersMap.ACCEPT)
       expect(_headers.use()).to.have.property(headersMap.ACCEPT_LANGUAGE)
     })
