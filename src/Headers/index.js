@@ -9,7 +9,16 @@ export const headersValuesMap = HEADERS_VALUES_MAP
 class Headers {
   constructor(){
     this.headers = {}
+    this.defaults = []
     this.headersMap = cloneDeep(HEADERS_MAP)
+  }
+
+  addDefault(){
+    this.operation = (obj) =>{
+      this.defaults.push(obj.header)
+      this.headers[obj.header] = obj.value
+    }
+    return this
   }
 
   default() {

@@ -75,5 +75,13 @@ describe('Headers', function(){
     it('should oauthToken header not defined if authData not passed ', function(){
       expect(new Headers().add().oauthToken().use()).to.not.have.property(headersMap.AUTHORIZATION)
     })
+
+    it('should add default header', function(){
+      let _headers = new Headers()
+      expect(_headers.addDefault().acceptApplicationJson().use()).to.have.property(headersMap.ACCEPT)
+      _headers.add().acceptLanguage('EN')
+      expect(_headers.use()).to.have.property(headersMap.ACCEPT)
+      expect(_headers.use()).to.have.property(headersMap.ACCEPT_LANGUAGE)
+    })
   })
 })
