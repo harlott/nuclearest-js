@@ -1,4 +1,4 @@
-import Headers, {headersMap, headersValuesMap} from '../src/Headers/index.js'
+import Headers, {headersMap, headersValuesMap} from '../src/Headers'
 
 const expect = require('chai').expect
 const assert = require('chai').assert
