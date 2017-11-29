@@ -64,6 +64,18 @@ describe('Headers', function(){
       expect(new Headers().remove().oauthBasicAuthentication().use()).to.be.empty
     })
 
+    it('should use oauthToken header', function(){
+      expect(new Headers().add().oauthToken(authData).use()).to.have.property(headersMap.AUTHORIZATION).to.be.equal(`${authData.tokenObject.tokenType} ${authData.tokenObject.accessToken}`)
+    })
+
+    it('should remove oauthToken header', function(){
+      expect(new Headers().remove().oauthToken().use()).to.be.empty
+    })
+
+    it('should oauthToken header not defined if authData not passed ', function(){
+      expect(new Headers().add().oauthToken().use()).to.not.have.property(headersMap.AUTHORIZATION)
+    })
+
   })
 })
 

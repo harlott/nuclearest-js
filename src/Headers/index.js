@@ -87,8 +87,8 @@ class Headers {
   }
 
   oauthToken(authData){
-    const tokenType = authData.tokenObject !== undefined ? authData.tokenObject.tokenType : undefined
-    const accessToken = authData.tokenObject !== undefined ? authData.tokenObject.accessToken : undefined
+    const tokenType = get(authData, 'tokenObject') !== undefined ? get(authData, 'tokenObject.tokenType') : undefined
+    const accessToken = get(authData, 'tokenObject') !== undefined ? get(authData, 'tokenObject.accessToken') : undefined
 
     if (tokenType !== null && tokenType !== undefined && accessToken !== null && accessToken !== undefined) {
       this.operation({
