@@ -11,17 +11,11 @@ describe('Headers', function(){
   })
   describe('#use()', function(){
     it('should use custom header', function(){
-      let _headers = new Headers()
-      let _header = {}
-      _header[headersMap.ACCEPT] = 'audio/base'
-      expect(_headers.add().custom('Accept', 'audio/base').use()).to.be.deep.equal(_header)
+      expect(new Headers().add().custom('Accept', 'audio/base').use()).to.have.property(headersMap.ACCEPT).to.be.equal('audio/base')
     })
 
     it('should use accept application json header', function(){
-      let _headers = new Headers()
-      let _header = {}
-      _header[headersMap.ACCEPT] = headersValuesMap.JSON
-      expect(_headers.add().acceptApplicationJson().use()).to.be.deep.equal(_header)
+      expect(new Headers().add().acceptApplicationJson().use()).to.have.property(headersMap.ACCEPT).to.be.equal(headersValuesMap.JSON)
     })
 
     it('should remove accept application json header', function(){
@@ -29,9 +23,7 @@ describe('Headers', function(){
     })
 
     it('should use accept language header', function(){
-      let _langHeader = {}
-      _langHeader[headersMap.ACCEPT_LANGUAGE] = 'IT'
-      expect(new Headers().add().acceptLanguage('IT').use()).to.be.deep.equal(_langHeader)
+      expect(new Headers().add().acceptLanguage('IT').use()).to.have.property(headersMap.ACCEPT_LANGUAGE).to.be.equal('IT')
     })
 
     it('should remove accept language header', function(){
@@ -39,16 +31,22 @@ describe('Headers', function(){
     })
 
     it('should use contentTypeJsonUtf8 header', function(){
-      let cType = {}
-      cType[headersMap.CONTENT_TYPE] = headersValuesMap.JSON_UTF8
-      expect(new Headers().add().contentTypeJsonUtf8().use()).to.be.deep.equal(cType)
+      expect(new Headers().add().contentTypeJsonUtf8().use()).to.have.property(headersMap.CONTENT_TYPE).to.be.equal(headersValuesMap.JSON_UTF8)
     })
 
     it('should remove contentTypeJsonUtf8 header', function(){
-      let cType = {}
-      cType[headersMap.CONTENT_TYPE] = headersValuesMap.JSON_UTF8
       expect(new Headers().remove().contentTypeJsonUtf8().use()).to.be.empty
     })
+
+    it('should use oauthClientAuthentication header', function(){
+      expect(new Headers().add().oauthClientAuthentication().use()).to.have.property(headersMap.CONTENT_TYPE).to.be.equal(headersValuesMap.FORM_URL_ENCODED)
+    })
+
+    it('should remove oauthClientAuthentication header', function(){
+      expect(new Headers().remove().oauthClientAuthentication().use()).to.be.empty
+    })
+
+
 
   })
 })
