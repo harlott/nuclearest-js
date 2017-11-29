@@ -1,9 +1,10 @@
-import { HEADERS_MAP } from './headers'
+import { HEADERS_MAP, HEADERS_VALUES_MAP } from './headers'
 
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 
 export const headersMap = HEADERS_MAP
+export const headersValuesMap = HEADERS_VALUES_MAP
 
 class Headers {
   constructor(){
@@ -64,6 +65,7 @@ class Headers {
       header: HEADERS_MAP.CONTENT_TYPE,
       value: 'application/json; charset=UTF-8'
     })
+    return this
   }
 
   oauthClientAuthentication(){

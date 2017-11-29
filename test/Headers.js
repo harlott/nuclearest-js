@@ -1,4 +1,4 @@
-import Headers, {headersMap} from '../src/Headers/index.js'
+import Headers, {headersMap, headersValuesMap} from '../src/Headers/index.js'
 
 const expect = require('chai').expect
 const assert = require('chai').assert
@@ -12,12 +12,16 @@ describe('Headers', function(){
   describe('#use()', function(){
     it('should use custom header', function(){
       let _headers = new Headers()
-      expect(_headers.add().custom('Accept', 'audio/base').use()).to.be.deep.equal({'Accept': 'audio/base'})
+      let _header = {}
+      _header[headersMap.ACCEPT] = 'audio/base'
+      expect(_headers.add().custom('Accept', 'audio/base').use()).to.be.deep.equal(_header)
     })
 
     it('should use accept application json header', function(){
       let _headers = new Headers()
-      expect(_headers.add().acceptApplicationJson().use()).to.be.deep.equal({'Accept': 'application/json'})
+      let _header = {}
+      _header[headersMap.ACCEPT] = headersValuesMap.JSON
+      expect(_headers.add().acceptApplicationJson().use()).to.be.deep.equal(_header)
     })
 
     it('should remove accept application json header', function(){
@@ -32,6 +36,18 @@ describe('Headers', function(){
 
     it('should remove accept language header', function(){
       expect(new Headers().add().acceptLanguage('IT').remove().acceptLanguage().use()).to.be.empty
+    })
+
+    it('should use contentTypeJsonUtf8 header', function(){
+      let cType = {}
+      cType[headersMap.CONTENT_TYPE] = headersValuesMap.JSON_UTF8
+      expect(new Headers().add().contentTypeJsonUtf8().use()).to.be.deep.equal(cType)
+    })
+
+    it('should remove contentTypeJsonUtf8 header', function(){
+      let cType = {}
+      cType[headersMap.CONTENT_TYPE] = headersValuesMap.JSON_UTF8
+      expect(new Headers().remove().contentTypeJsonUtf8().use()).to.be.empty
     })
 
   })
