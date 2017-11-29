@@ -5,6 +5,28 @@ import { get, cloneDeep, filter, includes } from 'lodash'
 export const headersMap = HEADERS_MAP
 export const headersValuesMap = HEADERS_VALUES_MAP
 
+/**
+ * Defines some basic methods to compose a headers map for using in fetch API.
+ * Provide simple HTTP request headers keys map and OAUTH specific methods.
+ *
+ *
+ * @example
+ *
+ * import fetch from 'nuclearest-js/fetch'
+ * import Headers, {headersMap} from 'nuclearest-js/Headers'
+ * import clientData from 'your/path/clientData'
+ *
+ * let headers = new Headers()
+ *                   .addDefault()
+ *                   .acceptApplicationJson()
+ *                   .acceptLanguage(clientData.lang)
+ *                   .add()
+ *                   .oauthToken()
+ *                   .custom('x-application-id', 'a1b2c3d4')
+ *                   .use()
+ *
+ * 
+ */
 class Headers {
   constructor(){
     this.headers = {}
