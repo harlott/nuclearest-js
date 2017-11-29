@@ -65,10 +65,6 @@ class Headers {
     return this
   }
 
-  default() {
-    return this.headers
-  }
-
   add(){
     this.operation = (obj) =>{
       this.headers[obj.header] = obj.value
