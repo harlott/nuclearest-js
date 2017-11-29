@@ -35,7 +35,7 @@ class Headers {
   }
 
   /**
-   * add default headers values. initAll() must be called to delete default values.
+   * Add default headers values. initAll() must be called to delete default values.
    *
    * @example
    *
@@ -64,14 +64,40 @@ class Headers {
     }
     return this
   }
-
+  /**
+   * Add headers by basic methods or custom by custom(header, value)
+   *
+   * @example
+   * let headers = new Headers()
+   *                   .add()
+   *                   .oauthToken()
+   *                   .custom('x-application-id', 'a1b2c3d4')
+   *                   .use()
+   */
   add(){
     this.operation = (obj) =>{
       this.headers[obj.header] = obj.value
     }
     return this
   }
-
+  /**
+   * Remove headers by basic or custom by custom(header, value)
+   *
+   * @example
+   * let headers = new Headers()
+   *                   .add()
+   *                   .oauthToken()
+   *                   .custom('x-application-id', 'a1b2c3d4')
+   *                   .use()
+   *
+   * headers
+   * .remove()
+   * .oauthToken()
+   * .use()
+   *
+   * //results: {'x-application-id', 'a1b2c3d4'}
+   *
+   */
   remove(){
     this.operation = (obj) =>{
       if (this.headers[obj.header] !== undefined){
