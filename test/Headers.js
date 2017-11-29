@@ -87,5 +87,18 @@ describe('Headers', function(){
       expect(_headers.use()).to.have.property(headersMap.ACCEPT)
       expect(_headers.use()).to.have.property(headersMap.ACCEPT_LANGUAGE)
     })
+
+    it('should init not defaults headers', function(){
+      let _headers = new Headers()
+      _headers
+        .addDefault()
+        .acceptApplicationJson()
+        .add()
+        .acceptLanguage('EN')
+        .contentTypeJsonUtf8()
+
+      expect(_headers.init()).to.have.property(headersMap.ACCEPT)
+      expect(_headers.init()).to.not.have.property(headersMap.ACCEPT_LANGUAGE)
+    })
   })
 })

@@ -1,7 +1,6 @@
 import { HEADERS_MAP, HEADERS_VALUES_MAP } from './headers'
 
-import cloneDeep from 'lodash/cloneDeep'
-import get from 'lodash/get'
+import { get, cloneDeep, filter, includes } from 'lodash'
 
 export const headersMap = HEADERS_MAP
 export const headersValuesMap = HEADERS_VALUES_MAP
@@ -51,6 +50,17 @@ class Headers {
 
   use(){
     return cloneDeep(this.headers)
+  }
+
+  init(){
+    let _props = Object.keys(this.headers)
+
+    for(let i=0; i < _props.length; i++){
+      if (!includes(this.defaults, _props[i])){
+        delete this.headers[_props[i]]
+      }
+    }
+    return this.headers
   }
 
   acceptApplicationJson(){

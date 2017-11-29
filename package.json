@@ -18,7 +18,11 @@
     "url": "https://github.com/harlott/nuclearest-js.git"
   },
   "keywords": [
+    "javascript",
+    "ES6",
     "fetch",
+    "WebStorage",
+    "HTTP Request Headers",
     "oauth",
     "refresh token"
   ],
