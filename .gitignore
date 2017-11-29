@@ -13,6 +13,8 @@
 /ssl
 # Created by https://www.gitignore.io
 
+.nyc_output/
+
 ### Windows ###
 # Windows image file caches
 Thumbs.db
