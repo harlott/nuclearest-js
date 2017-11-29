@@ -100,7 +100,7 @@ It does apply CXA (clientData, xhrOptionsData, authData) pattern: a web applicat
 
   - clientData: handle some configurations like 'applicationId', or some default values for some properties like '{lang: 'EN'}'
   - xhrOptionsData: handle timeout value, cors options...
-  - authData: handle authentication data like i.e. 'tokenObject: {tokenType: "Bearer", accessToken: "1111-2222-3333-4444"}'
+  - authData: handle authentication data i.e.(oauth) 'tokenObject: {tokenType: "Bearer", accessToken: "1111-2222-3333-4444"}'
 
 
 Example:
@@ -109,16 +109,39 @@ Example:
 
 ```
  import fetch from 'nuclearest-js/fetch'
- import Headers from 'nuclearest-js/Headers'
+ import Headers, {headersMap} from 'nuclearest-js/Headers'
  import CLIENT_DATA from 'your/path/CLIENT_DATA'
+
+ let headers = new Headers()
+                   .add()
+                   .acceptApplicationJson()
+                   .acceptLanguage('EN')
+                   .custom(headersMap.CONTENT_TYPE, 'audio/base')
+                   .use()
 
  fetch('/users', {
      method: 'POST',
      timeout: 40000,
-     headers: Headers.getHeadersDefault(CLIENT_DATA),
+     headers: headers,
      body: JSON.stringify({name: 'Jack'})
    }
  )
+
+
+ headers
+ .remove()
+ .custom(headersMap.CONTENT_TYPE, 'audio/base')
+ .acceptLanguage()
+ .use()
+
+
+ fetch('/contents', {
+      method: 'POST',
+      timeout: 40000,
+      headers: headers,
+      body: JSON.stringify({name: 'Jack'})
+    }
+  )
 
 
 ```
