@@ -137,6 +137,7 @@ class Headers {
     })
     return this
   }
+
   /**
    * Get the configured headers map
    * @return {object} headers map
@@ -145,6 +146,10 @@ class Headers {
     return cloneDeep(this.headers)
   }
 
+  /**
+   * Remove headers except defaults
+   * @return {object} headers map
+   */
   init(){
     let _props = Object.keys(this.headers)
 
@@ -156,6 +161,10 @@ class Headers {
     return this.headers
   }
 
+  /**
+   * Initialize all the headers map
+   * @return {[type]} empty headers map
+   */
   initAll(){
     this.headers = {}
     return this.headers
