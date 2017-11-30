@@ -68,11 +68,29 @@ class Headers {
    * Add headers by basic methods or custom by custom(header, value)
    *
    * @example
+   *
+   * let authData = {
+   *    tokenObject:{
+   *      tokenType: 'Bearer',
+   *      accessToken: 'a1b2-c3d4-e5f6-g7h8',
+   *      refreshToken: 'k1k2-j3j4-l5l6-p7p8',
+   *      expiresIn: '2000',
+   *      scope: 'user.role'
+   *    }
+   * }
+   *
+   * let clientData = {
+   *    lang: 'EN',
+   *    applicationId: 'a1b2c3d4'
+   * }
+   *
    * let headers = new Headers()
    *                   .add()
-   *                   .oauthToken()
-   *                   .custom('x-application-id', 'a1b2c3d4')
+   *                   .oauthToken(authData.tokenObject)
+   *                   .custom('x-application-id', clientData.applicationId)
    *                   .use()
+   *
+   * //results: {'Authorization': 'Bearer a1b2-c3d4-e5f6-g7h8', 'x-application-id', 'a1b2c3d4'}
    */
   add(){
     this.operation = (obj) =>{
@@ -107,6 +125,11 @@ class Headers {
     return this
   }
 
+  /**
+   * Add custom headers
+   * @param  {string} headerKey The header key to set i.e: 'x-application-id'
+   * @param  {string} value     The value to set i.e:   'a1b2c3d4'
+   */
   custom(headerKey, value){
     this.operation({
       header: headerKey,
