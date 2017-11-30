@@ -137,7 +137,10 @@ class Headers {
     })
     return this
   }
-
+  /**
+   * Get the configured headers map
+   * @return {object} headers map
+   */
   use(){
     return cloneDeep(this.headers)
   }
