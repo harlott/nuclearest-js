@@ -63,7 +63,7 @@ You can also create and use your own.
  **Features:**
 
  - handle storage disabled by Browser settings and Safari private session issue;
- - provide fallback strategy for basic storage settings;
+ - provide fallback strategy for basic storage settings (you can disable it);
  - simplify your application code refactoring :)    
 
 
@@ -86,7 +86,7 @@ You can also create and use your own.
  ```
   import Storage, {STORAGE_TYPES} from 'nuclearest-js/Storage'
 
-  const cookieStorage = new Storage(STORAGE_TYPES.COOKIE, window.cookie, undefined, {'grantedProps':['country'], callbackOnDisabled: () => {alert('COOKIE DISABLED')}})
+  const cookieStorage = new Storage(STORAGE_TYPES.COOKIE, window.cookie, undefined, {enabled: true, 'grantedProps':['country'], callbackOnDisabled: () => {alert('COOKIE DISABLED')}})
   cookieStorage.setItem('country', 'IT')
   cookieStorage.setItem('accessToken', 'aaaa-bbbb-cccc-dddd')
 
@@ -96,7 +96,10 @@ You can also create and use your own.
 #### Headers
 
 This is a simple centralized system to handle the request HTTP headers. Provide few basic methods for oauth authentication
-It does apply CXA (clientData, xhrOptionsData, authData) pattern: a web application can provide 3 types of parameters:
+
+To handle headers parameters, you can apply CXA (clientData, xhrOptionsData, authData) pattern:
+
+a web application can provide 3 types of parameters:
 
   - clientData: handle some configurations like 'applicationId', or some default values for some properties like '{lang: 'EN'}'
   - xhrOptionsData: handle timeout value, cors options...
