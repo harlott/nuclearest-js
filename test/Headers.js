@@ -10,11 +10,6 @@ describe('Headers', function(){
     tokenType: 'Bearer',
     accessToken: '2222'
   }
-  describe('#default', function(){
-    it('should be return defaults', function(){
-      expect(new Headers().default()).to.be.empty
-    })
-  })
   describe('#use()', function(){
     it('should use custom header', function(){
       expect(new Headers().add().custom('Accept', 'audio/base').use()).to.have.property(headersMap.ACCEPT).to.be.equal('audio/base')
