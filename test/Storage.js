@@ -1,4 +1,4 @@
-import Storage, { canUseStorage, buildCustomStorage, buildCustomStoragesMap } from '../src/Storage'
+import Storage, { canUseStorage, buildCustomStorage, buildCustomStoragesMap, STORAGE_TYPES } from '../src/Storage'
 
 const expect = require('chai').expect
 const assert = require('chai').assert
@@ -69,7 +69,7 @@ describe('Storage', function() {
         getItem: () => {throw new Error('disabled')},
         removeItem: () => {throw new Error('disabled')}
       }
-      let _storageDisabled = new Storage('STORAGE', _mockedLocalStorage, undefined, {'callbackOnDisabled': () => {__global__['callbackOnDisabled'] = true}})
+      let _storageDisabled = new Storage(STORAGE_TYPES.STORAGE, _mockedLocalStorage, undefined, {'callbackOnDisabled': () => {__global__['callbackOnDisabled'] = true}})
       try {
           _storageDisabled.setItem('a', 1)
       } catch(err){

@@ -1,6 +1,6 @@
 import { HEADERS_MAP, HEADERS_VALUES_MAP } from './headers'
 
-import { get, cloneDeep, filter, includes } from 'lodash'
+import { get, cloneDeep, includes } from 'lodash'
 
 export const headersMap = HEADERS_MAP
 export const headersValuesMap = HEADERS_VALUES_MAP
@@ -36,6 +36,7 @@ class Headers {
 
   /**
    * Add default headers values. initAll() must be called to delete default values.
+   * @returns {Headers} Headers instance
    *
    * @example
    *
@@ -57,8 +58,9 @@ class Headers {
    * //results: {}
    *
    */
+
   addDefault(){
-    this.operation = (obj) =>{
+    this.operation = (obj) => {
       this.defaults.push(obj.header)
       this.headers[obj.header] = obj.value
     }
@@ -66,6 +68,8 @@ class Headers {
   }
   /**
    * Add headers by basic methods or custom by custom(header, value)
+   *
+   * @returns {Headers} Headers instance
    *
    * @example
    *
@@ -93,13 +97,15 @@ class Headers {
    * //results: {'Authorization': 'Bearer a1b2-c3d4-e5f6-g7h8', 'x-application-id', 'a1b2c3d4'}
    */
   add(){
-    this.operation = (obj) =>{
+    this.operation = (obj) => {
       this.headers[obj.header] = obj.value
     }
     return this
   }
   /**
    * Remove headers by basic or custom by custom(header, value)
+   *
+   * @returns {Headers} Header instance
    *
    * @example
    * let headers = new Headers()
@@ -117,9 +123,9 @@ class Headers {
    *
    */
   remove(){
-    this.operation = (obj) =>{
+    this.operation = (obj) => {
       if (this.headers[obj.header] !== undefined){
-        delete this.headers[obj.header]
+        Reflect.deleteProperty(this.headers, obj.header)
       }
     }
     return this
@@ -128,7 +134,8 @@ class Headers {
   /**
    * Add custom headers
    * @param  {string} headerKey The header key to set i.e: 'x-application-id'
-   * @param  {string} value     The value to set i.e:   'a1b2c3d4'
+   * @param  {string} value     The value to set i.e: 'a1b2c3d4'
+   * @returns {Headers} Headers instance
    */
   custom(headerKey, value){
     this.operation({
@@ -153,9 +160,9 @@ class Headers {
   init(){
     let _props = Object.keys(this.headers)
 
-    for(let i=0; i < _props.length; i++){
+    for(let i=0; i < _props.length; i += 1){
       if (!includes(this.defaults, _props[i])){
-        delete this.headers[_props[i]]
+        Reflect.deleteProperty(this.headers, _props[i])
       }
     }
     return this.headers
