@@ -1,11 +1,10 @@
 import Emitter from './services/Emitter'
 
-import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import isFunction from 'lodash/isFunction'
 
-let __global__RefreshTokenObject = null
-let __global__isRefreshingToken = false
+let __GLOBAL__REFRESH_TOKEN_OBJECT
+let __GLOBAL__IS_REFRESHING_TOKEN
 let _applicationParams = null
 
 const eventEmitter = new Emitter()
@@ -20,23 +19,11 @@ class Auth{
 
   _redirectWithNoAuth(applicationParams){
     if (applicationParams.authData.tokenObject === undefined && (isFunction(applicationParams.clientData.redirectWithNoAuthCallback) === true)) {
-        applicationParams.clientData.redirectWithNoAuthCallback()
-        return
+        return applicationParams.clientData.redirectWithNoAuthCallback()
     }
   }
 
-  _authFailed(isRefreshTokenError, promiseCallback) {
-    var errObject = {
-        "error_description": "Authentication failed",
-        "error_uri": "https://tools.ietf.org/html/rfc6749#section-5.2",
-        "error": "invalid_grant"
-    }
-
-    let notApiResponse = {
-        statusCode: 401,
-        json: errObject
-    }
-
+  _authFailed() {
     this._resetAuthenticationCallback()
 
     if (isFunction(this._redirectWithNoAuth) === true){
@@ -45,13 +32,12 @@ class Auth{
   }
 
   _confirmRefreshToken(refreshTokenObject, apiCallMethod, clientData, xhrOptions, authData){
-    __global__RefreshTokenObject = {}
-    __global__RefreshTokenObject.clientData = clientData
-    __global__RefreshTokenObject.xhrOptions = xhrOptions
-    __global__RefreshTokenObject.authData = authData
-    __global__RefreshTokenObject.authData.tokenObject = cloneDeep(refreshTokenObject)
-
-    __global__isRefreshingToken = false
+    __GLOBAL__REFRESH_TOKEN_OBJECT = {}
+    __GLOBAL__REFRESH_TOKEN_OBJECT.clientData = clientData
+    __GLOBAL__REFRESH_TOKEN_OBJECT.xhrOptions = xhrOptions
+    __GLOBAL__REFRESH_TOKEN_OBJECT.authData = authData
+    __GLOBAL__REFRESH_TOKEN_OBJECT.authData.tokenObject = cloneDeep(refreshTokenObject)
+    __GLOBAL__IS_REFRESHING_TOKEN = false
     eventEmitter.emitGeneric('REFRESH_TOKEN')
     apiCallMethod()
 
@@ -60,111 +46,90 @@ class Auth{
 
   _refreshTokenProcess(apiCallMethod, promiseCallback, clientData, xhrOptions, authData) {
       if (authData.tokenObject === undefined) {
-        authFailed(clientData, false, promiseCallback)
-        return
+        return this._authFailed()
       }
-      this._refreshTokenMethod().then((response) => {
+      this._refreshTokenMethod()
+      .then((response) => {
         if (response.ok === false) {
-          let isRefreshTokenError = true
-          this._authFailed(isRefreshTokenError, promiseCallback)
-          return
+          return this._authFailed()
         }
-        this._confirmRefreshToken(response.json, apiCallMethod,clientData, xhrOptions, authData)
-      }).catch((err) => {
-          console.warn("Error on refreshToken", err.message);
-          console.error(err);
-          return err;
-      });
+        this._confirmRefreshToken(response.json, apiCallMethod, clientData, xhrOptions, authData)
+      })
+      .catch(
+        () => {
+          return this._authFailed()
+        }
+      );
   }
 
-  _checkAuth(json, statusCode, applicationParams){
+  _checkAuth(json, statusCode, applicationParams, eventCallback, errorCallback, apiCallback){
     if (statusCode === 401) {
-      errorCallback(json, statusCode)
+      return errorCallback(json, statusCode)
+    }
+
+    _applicationParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
+    if (__GLOBAL__IS_REFRESHING_TOKEN === true) {
+        return eventEmitter.on('REFRESH_TOKEN', eventCallback)
+    }
+    __GLOBAL__IS_REFRESHING_TOKEN = true
+    this._refreshTokenProcess(this._proxyApi.bind(this, _applicationParams), apiCallback, _applicationParams.clientData, _applicationParams.xhrOptions, _applicationParams.authData)
+  }
+
+  _proxyApi(applicationParams){
+    let appParams = __GLOBAL__REFRESH_TOKEN_OBJECT || applicationParams
+    const executeApiMethod =  (authData) => {
+        return apiMethod(authData)
+    }
+
+    return executeApiMethod(appParams.authData).then(
+        response => {
+            eventEmitter.removeListener('REFRESH_TOKEN', eventCallback)
+            return apiCallback(response)
+        }
+    ).catch(() => {
       return
-    }
-    _applicationParams = cloneDeep(__global__RefreshTokenObject) || cloneDeep(applicationParams)
-    if (__global__isRefreshingToken === true) {
-        eventEmitter.on('REFRESH_TOKEN', eventCallback)
-        return
-    }
-    __global__isRefreshingToken = true
-    dispatch(authCall(proxyApi.bind(this, _applicationParams), apiCallback, _applicationParams.clientData, _applicationParams.xhrOptions, _applicationParams.authData))
+    });
   }
 
   proxy(applicationParams, apiMethod, successCallback, errorCallback){
-    redirectWithNoAuth()
+    this._redirectWithNoAuth(applicationParams)
 
     const eventCallback = () => {
-        let newAppParams = cloneDeep(__global__RefreshTokenObject) || cloneDeep(applicationParams)
-        proxyApi.bind(this, newAppParams)()
-    }
-
-    var errorProxyCallback = function (json, statusCode) {
-        if (statusCode === 401) {
-            let newAppParams = cloneDeep(__global__RefreshTokenObject) || cloneDeep(applicationParams)
-            if (!__global__isRefreshingToken){
-                __global__isRefreshingToken = true
-                dispatch(authCall(proxyApi.bind(this, newAppParams), apiCallback, newAppParams.clientData, newAppParams.xhrOptions, newAppParams.authData))
-            } else {
-                eventEmitter.on('REFRESH_TOKEN', eventCallback)
-            }
-        } else {
-            errorCallback(json, statusCode)
-        }
-    }
-
-    var errorIeAuthCallback = function () {
-        let newAppParams = cloneDeep(__global__RefreshTokenObject) || cloneDeep(applicationParams)
-        dispatch(authCall(proxyApi.bind(this, newAppParams), apiCallback, newAppParams.clientData, newAppParams.xhrOptions, newAppParams.authData))
+        let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
+        this._proxyApi.bind(this, newAppParams)()
     }
 
     var apiCallback = (response, notApiResponse) => {
+        let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
         let errorEvaluated = false
-        if (!!response) {
+        if (response !== undefined) {
             if (response.status === 204) {
                 successCallback({})
             }
             else {
-                if (response.ok === true) {
-                    successCallback(response.json, response)
-                }
-                else {
-                    errorProxyCallback(response.json, response.status, response)
-                }
+              if (response.ok === true) {
+                  successCallback(response.json, response)
+              }
+              else {
+                  this._checkAuth(response.json, response.status, newAppParams, eventCallback, errorCallback, apiCallback)
+              }
             }
-        } else if (!!notApiResponse) {
+        } else if (notApiResponse !== undefined) {
             errorCallback(notApiResponse.json, notApiResponse.statusCode)
         } else {
             return null
         }
     }
 
-    var proxyApi = function (applicationParams) {
-        let appParams = __global__RefreshTokenObject || applicationParams
-        const executeApiMethod =  (authData) => {
-            return apiMethod(authData)
-        }
 
-        return executeApiMethod(appParams.authData).then(
-            response => {
-                eventEmitter.removeListener('REFRESH_TOKEN', eventCallback)
-                return apiCallback(response)
-            }
+    let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
 
-        ).catch((err) => {
-            errorIeAuthCallback();
-            console.warn("Error in authProxy", err.message);
-            console.error(err);
-
-            return err;
-        });
-    }
-    let newAppParams = cloneDeep(__global__RefreshTokenObject) || cloneDeep(applicationParams)
-
-    if (__global__isRefreshingToken === true){
+    if (__GLOBAL__IS_REFRESHING_TOKEN === true){
         eventEmitter.on('REFRESH_TOKEN', eventCallback)
     } else {
-        proxyApi.bind(this, newAppParams)()
+        this._proxyApi.bind(this, newAppParams)()
     }
   }
 }
+
+export default Auth
