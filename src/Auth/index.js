@@ -90,9 +90,8 @@ class Auth{
     __global__isRefreshingToken = true
     dispatch(authCall(proxyApi.bind(this, _applicationParams), apiCallback, _applicationParams.clientData, _applicationParams.xhrOptions, _applicationParams.authData))
   }
-}
 
-export const authProxy = (dispatch, applicationParams, apiMethod, successCallback, errorCallback) => {
+  proxy(applicationParams, apiMethod, successCallback, errorCallback){
     redirectWithNoAuth()
 
     const eventCallback = () => {
@@ -167,4 +166,5 @@ export const authProxy = (dispatch, applicationParams, apiMethod, successCallbac
     } else {
         proxyApi.bind(this, newAppParams)()
     }
+  }
 }
