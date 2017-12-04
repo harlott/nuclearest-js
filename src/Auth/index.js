@@ -1,4 +1,4 @@
-import Emitter from './services/Emitter'
+import Emitter from '../services/Emitter'
 import cloneDeep from 'lodash/cloneDeep'
 import isFunction from 'lodash/isFunction'
 
@@ -10,6 +10,9 @@ const eventEmitter = new Emitter()
 
 class Auth{
   constructor(refreshTokenMethod, confirmAuthenticationCallback, resetAuthenticationCallback, options={}){
+    if (isFunction(refreshTokenMethod) === false){
+      throw new Error('refreshTokenMethod parameter is required!')
+    }
     this._refreshTokenMethod = refreshTokenMethod
     this._confirmAuthenticationCallback = confirmAuthenticationCallback
     this._resetAuthenticationCallback = resetAuthenticationCallback
@@ -98,7 +101,7 @@ class Auth{
         this._proxyApi(newAppParams, apiCallback, apiMethod, eventCallback)()
     }
 
-    var apiCallback = (response, notApiResponse) => {
+    const apiCallback = (response, notApiResponse) => {
         let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
         if (response !== undefined) {
             if (response.status === 204) {
@@ -125,7 +128,7 @@ class Auth{
     if (__GLOBAL__IS_REFRESHING_TOKEN === true){
         eventEmitter.on('REFRESH_TOKEN', eventCallback)
     } else {
-        this._proxyApi.bind(this, newAppParams)()
+        this._proxyApi.bind(this, newAppParams, apiCallback, apiMethod, eventCallback)()
     }
   }
 }
