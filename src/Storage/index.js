@@ -36,11 +36,9 @@ export const canUseStorage = (storageType, storage, customStoragesMap) => {
 export const STORAGES_MAP = {
     storage: {
         setItem: (propertyName, value, storage) => {
-            console.log('a' + propertyName)
             storage.setItem(propertyName, JSON.stringify(value))
         },
         getItem: (propertyName, storage) => {
-          console.log('a' + propertyName)
             return storage.getItem(propertyName)
         },
         removeItem: (propertyName, storage) => {

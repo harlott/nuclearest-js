@@ -1,5 +1,4 @@
 import Emitter from './services/Emitter'
-
 import cloneDeep from 'lodash/cloneDeep'
 import isFunction from 'lodash/isFunction'
 
@@ -75,7 +74,7 @@ class Auth{
     this._refreshTokenProcess(this._proxyApi.bind(this, _applicationParams), apiCallback, _applicationParams.clientData, _applicationParams.xhrOptions, _applicationParams.authData)
   }
 
-  _proxyApi(applicationParams){
+  _proxyApi(applicationParams, apiCallback, apiMethod, eventCallback){
     let appParams = __GLOBAL__REFRESH_TOKEN_OBJECT || applicationParams
     const executeApiMethod =  (authData) => {
         return apiMethod(authData)
@@ -96,12 +95,11 @@ class Auth{
 
     const eventCallback = () => {
         let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
-        this._proxyApi.bind(this, newAppParams)()
+        this._proxyApi(newAppParams, apiCallback, apiMethod, eventCallback)()
     }
 
     var apiCallback = (response, notApiResponse) => {
         let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
-        let errorEvaluated = false
         if (response !== undefined) {
             if (response.status === 204) {
                 successCallback({})
