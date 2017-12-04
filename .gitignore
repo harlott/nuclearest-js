@@ -1,6 +1,4 @@
 *.js
-/scripts
-/scripts-win
 .iml
 .idea
 .project
