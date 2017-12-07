@@ -5,14 +5,21 @@ import { serverErrorResponse, isServerError } from './Utils'
 
 const Promise = require('es6-promise').Promise;
 
-const userAgent = get(navigator, 'userAgent')
-const isEdge =  /Edge\//.test(userAgent)
-if (isEdge) window.fetch = undefined
+import 'isomorphic-fetch';
+let _fetch = fetch
 
-import isoFetch  from 'isomorphic-fetch';
-import fetchPonyfill from 'fetch-ponyfill';
+if (navigator !== undefined){
+  const userAgent = get(navigator, 'userAgent')
+  const isEdge =  /Edge\//.test(userAgent)
+  if (isEdge) window.fetch = undefined
 
-const _fetch = isEdge === true ? fetchPonyfill().fetch : isoFetch
+  const fetchPonyfill = require('fetch-ponyfill')
+
+  _fetch = isEdge === true && fetchPonyfill().fetch
+
+}
+
+
 
 /**
  * This is a proxy method for standard fetch that use isomorphic-fetch

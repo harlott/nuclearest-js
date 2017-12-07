@@ -2,6 +2,8 @@ import Storage, { buildCustomStorage, buildCustomStoragesMap} from '../src/Stora
 
 before(function() {
   console.log('global setup');
+  global.window = {}
+  global.navigator = {}
   global.context = {
     browser: {
       navigator:{
