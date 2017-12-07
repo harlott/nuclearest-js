@@ -8,16 +8,6 @@ const Promise = require('es6-promise').Promise;
 import 'isomorphic-fetch';
 let _fetch = fetch
 
-if (navigator !== undefined){
-  const userAgent = get(navigator, 'userAgent')
-  const isEdge =  /Edge\//.test(userAgent)
-  if (isEdge) window.fetch = undefined
-
-  const fetchPonyfill = require('fetch-ponyfill')
-
-  _fetch = isEdge === true && fetchPonyfill().fetch
-
-}
 
 
 
@@ -50,6 +40,17 @@ if (navigator !== undefined){
 
 
 const fetch = (url, options) => {
+  if (navigator !== undefined){
+    const userAgent = get(navigator, 'userAgent')
+    const isEdge =  /Edge\//.test(userAgent)
+    if (isEdge) window.fetch = undefined
+
+    const fetchPonyfill = require('fetch-ponyfill')
+
+    _fetch = isEdge === true && fetchPonyfill().fetch
+
+  }
+
   let resPromise = () => (new Promise((resolve) => {
     let abort = false;
 
