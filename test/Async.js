@@ -4,9 +4,9 @@ const expect = require('chai').expect
 
 describe('Async methods', function(){
   it('should execute callback', function(done){
-    fetchMock.mock('http://httpbin.org/get', 200);
+    fetchMock.getOnce('http://gmail.com', 500);
 
-    fetch("http://httpbin.org/get").then((data) => {
+    fetch("http://gmail.com").then((data) => {
       console.log('got data', data);
       expect(data.status).to.equal(200)
       done()
