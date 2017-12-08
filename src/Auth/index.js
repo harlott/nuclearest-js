@@ -1,6 +1,5 @@
 import Emitter from '../services/Emitter'
-import cloneDeep from 'lodash/cloneDeep'
-import isFunction from 'lodash/isFunction'
+import { cloneDeep, isFunction, get } from 'lodash'
 
 let __GLOBAL__REFRESH_TOKEN_OBJECT
 let __GLOBAL__IS_REFRESHING_TOKEN
@@ -9,7 +8,8 @@ let _applicationParams = null
 const eventEmitter = new Emitter()
 
 class Auth{
-  constructor(refreshTokenMethod, confirmAuthenticationCallback, resetAuthenticationCallback, options={}){
+  constructor(refreshTokenMethod, confirmAuthenticationCallback, resetAuthenticationCallback, options={beforeRefreshTokenCallback: () => {}, debug: false}){
+
     if (isFunction(refreshTokenMethod) === false){
       throw new Error('refreshTokenMethod parameter is required!')
     }
@@ -17,6 +17,12 @@ class Auth{
     this._confirmAuthenticationCallback = confirmAuthenticationCallback
     this._resetAuthenticationCallback = resetAuthenticationCallback
     this._options = options
+  }
+
+  logger(output){
+    if (get(this._options, 'debug', false) === true){
+      console.log(output)
+    }
   }
 
   _checkAccessToken(applicationParams){
@@ -36,7 +42,7 @@ class Auth{
   }
 
   _confirmRefreshToken(refreshTokenObject, apiCallMethod, clientData, xhrOptions, authData){
-    console.log('INSIDE CONFIRM REFRESH TOKEN')
+    this.logger('INSIDE CONFIRM REFRESH TOKEN')
     __GLOBAL__REFRESH_TOKEN_OBJECT = {}
     __GLOBAL__REFRESH_TOKEN_OBJECT.clientData = clientData
     __GLOBAL__REFRESH_TOKEN_OBJECT.xhrOptions = xhrOptions
@@ -50,40 +56,44 @@ class Auth{
   }
 
   _refreshTokenProcess(apiCallMethod, promiseCallback, clientData, xhrOptions, authData) {
-      console.log('IN REFRESH TOKEN PROCESS')
+      this.logger('IN REFRESH TOKEN PROCESS')
       if (authData.tokenObject === undefined) {
         return this._authFailed()
       }
-      console.log('CALL REFRESH TOKEN METHOD')
+      this.logger('CALL REFRESH TOKEN METHOD')
+      if (isFunction(this._options.beforeRefreshTokenCallback)){
+        this._options.beforeRefreshTokenCallback()
+      }
       this._refreshTokenMethod()
       .then((response) => {
-        console.log(`REFRESH TOKEN PROMISE SOLVED: response.status is ${response.status}`)
+        this.logger(`REFRESH TOKEN PROMISE SOLVED: response.status is ${response.status}`)
         if (response.ok === false) {
-          console.log('REFRESH TOKEN FAILS')
+          this.logger('REFRESH TOKEN FAILS')
           return this._authFailed()
         }
-        console.log('CONFIRM REFRESH TOKEN')
+        this.logger('CONFIRM REFRESH TOKEN')
         this._confirmRefreshToken(response.json, apiCallMethod, clientData, xhrOptions, authData)
       })
       .catch(
         (err) => {
-          console.log(err)
-          //console.log('ERROR IN REFRESH TOKEN')
-          //return this._authFailed({authData: authData})
+          this.logger(err)
+          this.logger('ERROR IN REFRESH TOKEN')
+          return this._authFailed({authData: authData})
         }
-      );
+      ).then(()=>{
+        this.logger('REFRESH TOKEN DONE')
+      });
   }
 
   _checkAuth(json, statusCode, applicationParams, eventCallback, errorCallback, apiCallback){
     if (statusCode === 401) {
-
       _applicationParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
-      console.log(`CHECK AUTH => params = ${_applicationParams}`)
+      this.logger(`CHECK AUTH => params = ${_applicationParams}`)
       if (__GLOBAL__IS_REFRESHING_TOKEN === true) {
           return eventEmitter.on('REFRESH_TOKEN', eventCallback)
       }
       __GLOBAL__IS_REFRESHING_TOKEN = true
-      console.log('PROCESSING REFRESH TOKEN')
+      this.logger('PROCESSING REFRESH TOKEN')
       return this._refreshTokenProcess(this._proxyApi.bind(this, _applicationParams), apiCallback, _applicationParams.clientData, _applicationParams.xhrOptions, _applicationParams.authData)
     } else {
       return errorCallback(json, statusCode)
@@ -94,8 +104,9 @@ class Auth{
 
   _proxyApi(applicationParams, apiCallback, apiMethod, eventCallback){
     let appParams = __GLOBAL__REFRESH_TOKEN_OBJECT || applicationParams
-    console.log(`_proxyApi => appParams = ${JSON.stringify(appParams)}`)
+    this.logger(`_proxyApi => appParams = ${JSON.stringify(appParams)}`)
     const executeApiMethod =  (authData) => {
+        this.logger('EXECUTE API METHOD')
         return apiMethod(authData)
     }
 
@@ -104,8 +115,9 @@ class Auth{
             eventEmitter.removeListener('REFRESH_TOKEN', eventCallback)
             return apiCallback(response)
         }
-    ).catch(() => {
-      return
+    ).catch((err) => {
+      this.logger(` CATCHING API METHOD WITH ERROR ${JSON.stringify(err)}`)
+      return apiCallback(err)
     });
   }
 
@@ -115,11 +127,11 @@ class Auth{
 
     const eventCallback = () => {
         let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
-        this._proxyApi(newAppParams, apiCallback, apiMethod, eventCallback)()
+        return this._proxyApi(newAppParams, apiCallback, apiMethod, eventCallback)
     }
 
     const apiCallback = (response, notApiResponse) => {
-        console.log('INSIDE API CALLBACK')
+        this.logger('INSIDE API CALLBACK')
         let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
         if (response !== undefined) {
             if (response.status === 204) {
@@ -130,7 +142,7 @@ class Auth{
                   successCallback(response.json, response)
               }
               else {
-                console.log('CHECK AUTH')
+                this.logger('CHECK AUTH')
                   return this._checkAuth(response.json, response.status, newAppParams, eventCallback, errorCallback, apiCallback)
               }
             }
@@ -143,11 +155,11 @@ class Auth{
 
 
     let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
-    console.log(`APPLICATION PARAMS IN PROXY = ${JSON.stringify(newAppParams)}`)
+    this.logger(`APPLICATION PARAMS IN PROXY = ${JSON.stringify(newAppParams)}`)
     if (__GLOBAL__IS_REFRESHING_TOKEN === true){
         eventEmitter.on('REFRESH_TOKEN', eventCallback)
     } else {
-        console.log('CALLING _proxyApi')
+        this.logger('CALLING _proxyApi')
         this._proxyApi(newAppParams, apiCallback, apiMethod, eventCallback)
     }
   }
