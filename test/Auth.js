@@ -144,7 +144,7 @@ describe('Auth', function(){
       //done()
     }
 
-    const auth = new Auth(refreshToken, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: true})
+    const auth = new Auth(refreshToken, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
     auth.proxy({authData:{tokenObject:{accessToken: '11111'}}}, action, successCallback, errorCallback)
   })
 })
