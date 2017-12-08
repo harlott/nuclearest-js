@@ -1,15 +1,24 @@
 import Auth from '../src/Auth'
-const fetchMock = require('fetch-mock');
 import 'isomorphic-fetch'
 const expect = require('chai').expect
 const assert = require('chai').assert
 
 describe('Auth', function(){
+
   it('expect to execute api method with authorization granted', (done) => {
-    fetchMock.get("http://localhost/go", {status: 200, ok: true, body: {a: 1}});
 
     const action  = () => {
-        return fetch('http://localhost/go', {method: 'GET'})
+      return new Promise((resolve, reject)=>{
+        reject({
+          ok: true,
+          status: 200,
+          json: () => {
+            return new Promise((resolve) => {
+              resolve({a: 1})
+            })
+          }
+        })
+      })
     }
 
     const successCallback = (json, response) => {
@@ -28,16 +37,23 @@ describe('Auth', function(){
 
     }
 
-    let auth = new Auth(() => {}, () => {}, () => {}, {})
+    const auth = new Auth(() => {}, () => {}, () => {}, {})
     auth.proxy({authData:{tokenObject:{accessToken: '11111'}}}, action, successCallback, errorCallback)
-    fetchMock.restore();
   })
 
   it('expect to  execute error callback with error status', (done) => {
-    fetchMock.get("http://localhost/go", {status: 404, ok: false, body: {error: {code: 'NOT_FOUND', message: 'Not found!'}}});
-
     const action  = () => {
-        return fetch('http://localhost/go', {method: 'GET'})
+    return new Promise((resolve, reject)=>{
+      reject({
+        ok: false,
+        status: 405,
+        json: () => {
+          return new Promise((resolve) => {
+            resolve({code: 'METHOD NOT ALLOWED'})
+          })
+        }
+      })
+    })
     }
 
     const successCallback = (json, response) => {
@@ -51,31 +67,56 @@ describe('Auth', function(){
     const errorCallback = (json, status) => {
       console.log(status)
       done()
-      expect(status).to.be.equal(401)
 
+      expect(status).to.be.equal(405)
       console.log(status)
       console.log('ERROR')
 
     }
 
-    let auth = new Auth(() => {}, () => {}, () => {}, {})
+    const auth = new Auth(() => {}, () => {}, () => {}, {})
     auth.proxy({authData:{tokenObject:{accessToken: '11111'}}}, action, successCallback, errorCallback)
-    fetchMock.restore();
   })
 
   it('expect to process and fail refresh token with authorization failed', (done) => {
-    fetchMock.get("http://localhost/go", {status: 401, ok: false, body: {error: {code: 'NOT_AUTHORIZED', message: 'Not Authorized!'}}});
-    fetchMock.mock('http://localhost/refresh-token', {status: 401, ok: false})
-
     const refreshToken = () => {
-      return fetch('http://localhost/refresh-token', {method: 'POST'})
+      console.log('BEFORE REFRESH TOKEN POST')
+
+      return new Promise((resolve, reject)=>{
+        reject({
+          ok: false,
+          status: 401,
+          json: () => {
+            return new Promise((resolve) => {
+              resolve({
+                code: 'NOT_AUTHORIZED',
+                message: 'Not authorized!'
+              })
+            })
+          }
+        })
+      })
     }
 
     const action  = () => {
-        return fetch('http://localhost/go', {method: 'GET'})
+        return new Promise((resolve, reject)=>{
+          reject({
+            ok: false,
+            status: 401,
+            json: () => {
+              return new Promise((resolve) => {
+                resolve({
+                  code: 'NOT_AUTHORIZED',
+                  message: 'Not authorized!'
+                })
+              })
+            }
+          })
+        })
     }
 
     const successCallback = (json, response) => {
+      console.log('SUCCESS CALLBACK')
       response.json().then((json) => {
         expect(response.ok).to.be.equal(true)
         done()
@@ -98,8 +139,12 @@ describe('Auth', function(){
       done()
     }
 
-    let auth = new Auth(refreshToken, () => {}, resetAuthentication, {})
+    const beforeRefreshTokenCallback = () => {
+      console.log('BEFORE REFRESH TOKEN PROCESS CALLBACK')
+      //done()
+    }
+
+    const auth = new Auth(refreshToken, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: true})
     auth.proxy({authData:{tokenObject:{accessToken: '11111'}}}, action, successCallback, errorCallback)
-    fetchMock.restore();
   })
 })
