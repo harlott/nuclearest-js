@@ -4,6 +4,7 @@ let _instance = null
 export default class Emitter{
     constructor(){
       this.eventEm = new EventEmitter();
+      this.eventEm.setMaxListeners(100)
       if (_instance === null){
           _instance = this
       }
