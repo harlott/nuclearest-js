@@ -125,7 +125,7 @@ describe('Auth', function(){
     }
 
     const auth = new Auth(() => {}, () => {}, () => {}, {})
-    auth.proxy({authData:{tokenObject:{accessToken: '11111'}}}, fetchAuth, successCallback, errorCallback)
+    auth.proxy({tokenObject:{accessToken: '11111'}}, fetchAuth, successCallback, errorCallback)
   })
 
   it('expect to execute error callback with error status', (done) => {
@@ -148,7 +148,7 @@ describe('Auth', function(){
     }
 
     const auth = new Auth(() => {}, () => {}, () => {}, {})
-    auth.proxy({authData:{tokenObject:{accessToken: '11111'}}}, fetchError, successCallback, errorCallback)
+    auth.proxy({tokenObject:{accessToken: '11111'}}, fetchError, successCallback, errorCallback)
   })
 
   it('expect to process and fail refresh token with authorization failed', (done) => {
@@ -182,7 +182,7 @@ describe('Auth', function(){
     }
 
     const auth = new Auth(refreshTokenNoAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
-    auth.proxy({authData:{tokenObject:{accessToken: '11111'}}}, fetchNoAuth, successCallback, errorCallback)
+    auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth, successCallback, errorCallback)
   })
 
   it('expect to process and post refresh token', (done) => {
@@ -216,7 +216,7 @@ describe('Auth', function(){
     }
 
     const auth = new Auth(refreshTokenAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
-    auth.proxy({authData:{tokenObject:{accessToken: '11111'}}}, fetchNoAuth, successCallback, errorCallback)
+    auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth, successCallback, errorCallback)
   })
 
   it('expect to fail authentication, post refresh token and process multiple calls ', (done) => {
@@ -263,7 +263,7 @@ describe('Auth', function(){
 
     const auth = new Auth(refreshTokenAuth, confirmAuthentication, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
     for (let i=0; i < 10; i += 1){
-        auth.proxy({authData:{tokenObject:{accessToken: '11111'}}}, fetchNoAuth, successCallback, errorCallback)
+        auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth, successCallback, errorCallback)
     }
   })
 
@@ -309,7 +309,7 @@ describe('Auth', function(){
 
     const auth = new Auth(refreshTokenNoAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
     for (let i=0; i < 10; i += 1){
-        auth.proxy({authData:{tokenObject:{accessToken: '11111'}}}, fetchNoAuth, successCallback, errorCallback)
+        auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth, successCallback, errorCallback)
     }
   })
 
