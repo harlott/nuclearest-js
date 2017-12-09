@@ -1,6 +1,4 @@
 *.js
-/scripts
-/scripts-win
 .iml
 .idea
 .project
@@ -8,13 +6,12 @@
 .tern-project
 .settings
 .dropbox.attr
-/configDist/runtimeEnv.js
 /app/less/*.css
 /ssl
 # Created by https://www.gitignore.io
 
 .nyc_output/
-
+mochawesome-report/
 ### Windows ###
 # Windows image file caches
 Thumbs.db
@@ -259,8 +256,3 @@ build/
 
 # Ignore Gradle GUI config
 gradle-app.setting
-app/config.js
-app/scripts/config.js
-src/services/ftscroller.js
-configDist/runtimeEnv.js
-
