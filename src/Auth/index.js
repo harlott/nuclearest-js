@@ -25,18 +25,6 @@ class Auth{
     }
   }
 
-  _checkAccessToken(applicationParams){
-    if (applicationParams.authData.tokenObject === undefined && (isFunction(applicationParams.clientData.redirectWithNoAuthCallback) === true)) {
-        return applicationParams.clientData.redirectWithNoAuthCallback()
-    }
-  }
-
-  _redirectWithNoAuth(applicationParams){
-    if (isFunction(applicationParams.clientData.redirectWithNoAuthCallback) === true) {
-        return applicationParams.clientData.redirectWithNoAuthCallback()
-    }
-  }
-
   _authFailed(applicationParams) {
     __GLOBAL__IS_REFRESHING_TOKEN = false
     this._resetAuthenticationCallback()
@@ -123,7 +111,6 @@ class Auth{
   proxy(applicationParams, apiMethod, successCallback, errorCallback){
     __GLOBAL__REFRESH_TOKEN_OBJECT = undefined
     this._redirectWithAuthenticationFailed = false
-    this._checkAccessToken(applicationParams)
 
     const eventCallback = () => {
         let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
