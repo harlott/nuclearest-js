@@ -82,9 +82,9 @@ describe('Auth', function(){
       })
   }
 
-  const fetchAuth = () => {
-    return new Promise((resolve, reject)=>{
-      reject({
+  async function fetchAuth(){
+    return new Promise((resolve)=>{
+      resolve({
         ok: true,
         status: 200,
         json: () => {
@@ -96,91 +96,34 @@ describe('Auth', function(){
     })
   }
 
-  const fetchError = () => {
-    return new Promise((resolve, reject)=>{
-      reject({
-        ok: false,
-        status: 405,
-        json: () => {
-          return new Promise((resolve) => {
-            resolve({code: 'METHOD_NOT ALLOWED'})
-          })
-        }
-      })
+  function fetchError(){
+    throw new Error({
+      ok: false,
+      status: 405,
+      json: () => {
+        return new Promise((resolve) => {
+          resolve({code: 'METHOD_NOT ALLOWED'})
+        })
+      }
     })
   }
 
   it('expect to execute api method with authorization granted', async () => {
-    const successCallback = async (json, response) => {
-      const res = await response
-      const jsonRes = await res.json
-      console.log(JSON.stringify(jsonRes))
-      /*response.json().then((json) => {
-        expect(response.ok).to.be.equal(true)
-
-        logger(`JSON IS ${JSON.stringify(json)}`)
-      })*/
-    }
-
-    const errorCallback = (json, status) => {
-      expect(response.ok).to.be.equal(false)
-      done()
-      logger(status)
-      logger('ERROR')
-
-    }
-
-    const auth = new Auth(() => {}, () => {}, () => {}, {})
-    auth.proxy({tokenObject:{accessToken: '11111'}}, fetchAuth, successCallback, errorCallback)
+    const auth = new Auth(() => {}, () => {}, () => {}, {beforeRefreshTokenCallback: () => {}, debug: true})
+    const callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchAuth)
+    console.log(`CALL RES = ${JSON.stringify(callRes)}`)
+    expect(callRes.ok).to.be.equal(true)
   })
 
-  it('expect to execute error callback with error status', (done) => {
-    const successCallback = (json, response) => {
-      response.json().then((json) => {
-        expect(response.ok).to.be.equal(true)
-        done()
-        logger(`JSON IS ${JSON.stringify(json)}`)
-      })
-    }
-
-    const errorCallback = (json, status) => {
-      logger(status)
-      done()
-
-      expect(status).to.be.equal(405)
-      logger(status)
-      logger('ERROR')
-
-    }
-
+  it('expect to execute error callback with error status', async () => {
     const auth = new Auth(() => {}, () => {}, () => {}, {})
-    auth.proxy({tokenObject:{accessToken: '11111'}}, fetchError, successCallback, errorCallback)
+    const callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchError)
+    expect(callRes.status).to.be.equal(405)
   })
 
-  it('expect to process and fail refresh token with authorization failed', (done) => {
-    const successCallback = (json, response) => {
-      logger('SUCCESS CALLBACK')
-      response.json().then((json) => {
-        expect(response.ok).to.be.equal(true)
-        done()
-        logger(`JSON IS ${JSON.stringify(json)}`)
-      })
-    }
-
-    const errorCallback = (json, status) => {
-      logger(`ERROR IN REFRESH TOKEN${status}`)
-      done()
-      expect(status).to.be.equal(401)
-
-      logger(status)
-      logger('ERROR')
-
-    }
-
-
+  it('expect to process and fail refresh token with authorization failed', async () => {
     const resetAuthentication = () => {
       logger('RESET AUTHENTICATION - END')
-      done()
     }
 
     const beforeRefreshTokenCallback = () => {
@@ -188,30 +131,10 @@ describe('Auth', function(){
     }
 
     const auth = new Auth(refreshTokenNoAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
-    auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth, successCallback, errorCallback)
+    const callres = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth)
   })
 
-  it('expect to process and post refresh token', (done) => {
-    const successCallback = (json, response) => {
-      logger('SUCCESS CALLBACK')
-      response.json().then((json) => {
-        expect(response.ok).to.be.equal(true)
-        done()
-        logger(`JSON IS ${JSON.stringify(json)}`)
-      })
-    }
-
-    const errorCallback = (json, status) => {
-      logger(`ERROR IN REFRESH TOKEN${status}`)
-      done()
-      expect(status).to.be.equal(401)
-
-      logger(status)
-      logger('ERROR')
-
-    }
-
-
+  it('expect to process and post refresh token', async () => {
     const resetAuthentication = () => {
       logger('RESET AUTHENTICATION - END')
       done()
@@ -222,37 +145,16 @@ describe('Auth', function(){
     }
 
     const auth = new Auth(refreshTokenAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
-    auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth, successCallback, errorCallback)
+    const callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth, successCallback, errorCallback)
   })
 
-  it('expect to fail authentication, post refresh token and process multiple calls ', (done) => {
+  it('expect to fail authentication, post refresh token and process multiple calls ', async () => {
     let hasDone = false
 
     const processAsync = () => {
       if (hasDone === false){
         hasDone = true
-        done()
       }
-    }
-
-    const successCallback = (json, response) => {
-      logger('SUCCESS CALLBACK')
-      response.json().then((json) => {
-        expect(response.ok).to.be.equal(true)
-
-        processAsync()
-        logger(`JSON IS ${JSON.stringify(json)}`)
-      })
-    }
-
-    const errorCallback = (json, status) => {
-      logger(`ERROR IN REFRESH TOKEN${status}`)
-      processAsync()
-      expect(status).to.be.equal(401)
-
-      logger(status)
-      logger('ERROR')
-
     }
 
     const confirmAuthentication = (authData) => {
@@ -269,11 +171,11 @@ describe('Auth', function(){
 
     const auth = new Auth(refreshTokenAuth, confirmAuthentication, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
     for (let i=0; i < 10; i += 1){
-        auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth, successCallback, errorCallback)
+        const callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth)
     }
   })
 
-  it('expect to fail authentication, fail refresh token and process any call', (done) => {
+  it('expect to fail authentication, fail refresh token and process any call', async () => {
     let hasDone = false
 
     const processAsync = () => {
@@ -283,26 +185,6 @@ describe('Auth', function(){
       }
     }
 
-    const successCallback = (json, response) => {
-      logger('SUCCESS CALLBACK')
-      response.json().then((json) => {
-        expect(response.ok).to.be.equal(true)
-
-        processAsync()
-        logger(`JSON IS ${JSON.stringify(json)}`)
-      })
-    }
-
-    const errorCallback = (json, status) => {
-      logger(`ERROR IN REFRESH TOKEN${status}`)
-      processAsync()
-      expect(status).to.be.equal(401)
-
-      logger(status)
-      logger('ERROR')
-
-    }
-
     const resetAuthentication = () => {
       logger('RESET AUTHENTICATION - END')
       processAsync()
@@ -310,12 +192,11 @@ describe('Auth', function(){
 
     const beforeRefreshTokenCallback = () => {
       logger('BEFORE REFRESH TOKEN PROCESS CALLBACK')
-      //done()
     }
 
     const auth = new Auth(refreshTokenNoAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
     for (let i=0; i < 10; i += 1){
-        auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth, successCallback, errorCallback)
+        const callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth)
     }
   })
 
