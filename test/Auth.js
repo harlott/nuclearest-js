@@ -1,6 +1,9 @@
 import Auth from '../src/Auth'
-const expect = require('chai').expect
-const assert = require('chai').assert
+import chai, {expect, assert} from 'chai'
+import chaiAsPromised from 'chai-as-promised'
+chai.use(chaiAsPromised)
+//const expect = require('chai').expect
+//const assert = require('chai').assert
 const debug = false
 
 const logger = (msg) => {
@@ -107,13 +110,16 @@ describe('Auth', function(){
     })
   }
 
-  it('expect to execute api method with authorization granted', (done) => {
-    const successCallback = (json, response) => {
-      response.json().then((json) => {
+  it('expect to execute api method with authorization granted', async () => {
+    const successCallback = async (json, response) => {
+      const res = await response
+      const jsonRes = await res.json
+      console.log(JSON.stringify(jsonRes))
+      /*response.json().then((json) => {
         expect(response.ok).to.be.equal(true)
-        done()
+
         logger(`JSON IS ${JSON.stringify(json)}`)
-      })
+      })*/
     }
 
     const errorCallback = (json, status) => {
