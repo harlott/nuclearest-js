@@ -25,9 +25,12 @@ class Auth{
     }
   }
 
-  _authFailed(applicationParams) {
+  _authFailed(reason) {
     __GLOBAL__IS_REFRESHING_TOKEN = false
     this._resetAuthenticationCallback()
+    return new Promise((resolve, reject) => {
+        reject(reason)
+    })
   }
 
   _confirmRefreshToken(response, apiCallMethod){
@@ -37,7 +40,7 @@ class Auth{
       __GLOBAL__REFRESH_TOKEN_OBJECT.tokenObject = cloneDeep(json)
       __GLOBAL__IS_REFRESHING_TOKEN = false
       eventEmitter.emitGeneric('REFRESH_TOKEN')
-      apiCallMethod()
+      return apiCallMethod()
 
       this._confirmAuthenticationCallback(json)
     })
@@ -45,8 +48,11 @@ class Auth{
 
   _refreshTokenProcess(apiCallMethod, promiseCallback, authData) {
       this.logger('IN REFRESH TOKEN PROCESS')
-      if (authData.tokenObject === undefined) {
-        return this._authFailed()
+      if (get(authData, 'tokenObject.accessToken') === undefined && get(authData, 'tokenObject.refreshToken') === undefined) {
+        return this._authFailed({
+          code: 'TOKEN_OBJECT_NOT_DEFINED',
+          message: 'tokenObject is undefined'
+        })
       }
       this.logger('CALL REFRESH TOKEN METHOD')
       if (isFunction(this._options.beforeRefreshTokenCallback)){
@@ -57,7 +63,7 @@ class Auth{
         this.logger(`REFRESH TOKEN PROMISE SOLVED: response.status is ${response.status}`)
         if (response.ok === false) {
           this.logger('REFRESH TOKEN FAILS')
-          return this._authFailed()
+          return this._authFailed(response)
         }
         this.logger('CONFIRM REFRESH TOKEN')
         this._confirmRefreshToken(response, apiCallMethod)
@@ -66,7 +72,12 @@ class Auth{
         (err) => {
           this.logger(err)
           this.logger('ERROR IN REFRESH TOKEN')
-          return this._authFailed({authData: authData})
+          return this._authFailed(
+            {
+              code: 'REFRESH_TOKEN_ERROR',
+              message: `Refresh token proccess error with auth parameters ${authData}`
+            }
+          )
         }
       ).then(()=>{
         this.logger('REFRESH TOKEN DONE')
