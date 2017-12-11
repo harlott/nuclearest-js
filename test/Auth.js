@@ -2,8 +2,7 @@ import Auth from '../src/Auth'
 import chai, {expect, assert} from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 chai.use(chaiAsPromised)
-//const expect = require('chai').expect
-//const assert = require('chai').assert
+
 const debug = false
 
 const logger = (msg) => {
@@ -82,7 +81,7 @@ describe('Auth', function(){
       })
   }
 
-  async function fetchAuth(){
+  const fetchAuth = () => {
     return new Promise((resolve)=>{
       resolve({
         ok: true,
