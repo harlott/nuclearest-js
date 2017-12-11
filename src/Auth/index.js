@@ -72,7 +72,7 @@ class Auth{
       return this._confirmRefreshToken(refreshTokenProcessed, apiCallMethod)
   }
 
-  _checkAuth(json, statusCode, authData, eventCallback, errorCallback, apiCallback){
+  _checkAuth(json, statusCode, authData, eventCallback){
     if (statusCode === 401) {
       let _authData = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(authData)
       this.logger(`CHECK AUTH => params = ${_authData}`)
@@ -87,7 +87,7 @@ class Auth{
     }
   }
 
-  async _proxyApi(authData, apiCallback, apiMethod, eventCallback){
+  async _proxyApi(authData, apiMethod, eventCallback){
     let _authData = __GLOBAL__REFRESH_TOKEN_OBJECT || authData
     this.logger(`_proxyApi => appParams = ${JSON.stringify(_authData)}`)
     let resApiMethod = undefined
@@ -96,8 +96,10 @@ class Auth{
         resApiMethod = await apiMethod(_authData)
         this.logger(`resApiMethod = ${JSON.stringify(resApiMethod)}`)
     } catch(err) {
-      //resApiMethod = await apiMethod(_authData)
       this.logger(`_proxyApi ERROR = ${JSON.stringify(err)}`)
+      this.logger('CHECK AUTH')
+      return this._checkAuth(response.json, response.status, _authData, eventCallback)
+
     }
 
     return new Promise((resolve, reject) => {
@@ -115,30 +117,7 @@ class Auth{
     __GLOBAL__REFRESH_TOKEN_OBJECT = undefined
     const eventCallback = () => {
         let _authData = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(authData)
-        return this._proxyApi(_authData, apiCallback, apiMethod, eventCallback)
-    }
-
-    const apiCallback = (response, notApiResponse) => {
-        this.logger('INSIDE API CALLBACK')
-        let _authData = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(authData)
-        if (response !== undefined) {
-            if (response.status === 204) {
-                successCallback({})
-            }
-            else {
-              if (response.ok === true) {
-                  successCallback(response.json, response)
-              }
-              else {
-                this.logger('CHECK AUTH')
-                  return this._checkAuth(response.json, response.status, _authData, eventCallback, errorCallback, apiCallback)
-              }
-            }
-        } else if (notApiResponse !== undefined) {
-            errorCallback(notApiResponse.json, notApiResponse.statusCode)
-        } else {
-            return null
-        }
+        return this._proxyApi(_authData, apiMethod, eventCallback)
     }
 
     this.logger(`APPLICATION PARAMS IN PROXY = ${JSON.stringify(authData)}`)
