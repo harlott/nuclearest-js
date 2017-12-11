@@ -82,6 +82,7 @@ describe('Auth', function(){
   }
 
   const fetchAuth = () => {
+
     return new Promise((resolve)=>{
       resolve({
         ok: true,
@@ -96,7 +97,7 @@ describe('Auth', function(){
   }
 
   function fetchError(){
-    throw new Error({
+    return Promise.reject(new Error({
       ok: false,
       status: 405,
       json: () => {
@@ -105,18 +106,22 @@ describe('Auth', function(){
         })
       }
     })
+    )
+
   }
 
   it('expect to execute api method with authorization granted', async () => {
-    const auth = new Auth(() => {}, () => {}, () => {}, {beforeRefreshTokenCallback: () => {}, debug: true})
+    const auth = new Auth(() => {}, () => {}, () => {}, {beforeRefreshTokenCallback: () => {}, debug: false})
     const callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchAuth)
     console.log(`CALL RES = ${JSON.stringify(callRes)}`)
     expect(callRes.ok).to.be.equal(true)
   })
 
   it('expect to execute error callback with error status', async () => {
-    const auth = new Auth(() => {}, () => {}, () => {}, {})
-    const callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchError)
+    const auth = new Auth(() => {}, () => {}, () => {}, {beforeRefreshTokenCallback: () => {}, debug: true})
+    let callRes
+    callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchError)
+    console.log(`SUCCESS API CALL ERROR ${JSON.stringify(callRes)}`)
     expect(callRes.status).to.be.equal(405)
   })
 
@@ -129,8 +134,8 @@ describe('Auth', function(){
       logger('BEFORE REFRESH TOKEN PROCESS CALLBACK')
     }
 
-    const auth = new Auth(refreshTokenNoAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
-    const callres = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth)
+    const auth = new Auth(refreshTokenNoAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: true})
+    const callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth)
   })
 
   it('expect to process and post refresh token', async () => {
@@ -144,7 +149,7 @@ describe('Auth', function(){
     }
 
     const auth = new Auth(refreshTokenAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
-    const callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth, successCallback, errorCallback)
+    const callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth)
   })
 
   it('expect to fail authentication, post refresh token and process multiple calls ', async () => {
