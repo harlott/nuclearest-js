@@ -36,7 +36,9 @@ class Auth{
   _authFailed(reason) {
     __GLOBAL__IS_REFRESHING_TOKEN = false
     this._resetAuthenticationCallback()
-    return Promise.reject(reason)
+    return new Promise((resolve, reject)=>{
+      reject(reason)
+    })
   }
 
   async _confirmRefreshToken(response, apiCallMethod){
