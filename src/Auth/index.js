@@ -8,7 +8,6 @@ const eventEmitter = new Emitter()
 
 class Auth{
   constructor(refreshTokenApiCall, confirmAuthenticationCallback, resetAuthenticationCallback, options={beforeRefreshTokenCallback: () => {}, debug: false}){
-
     if (isFunction(refreshTokenApiCall) === false){
       throw new Error('refreshTokenMethod parameter is required!')
     }
@@ -62,6 +61,7 @@ class Auth{
         resolve(jsonResultProcessed)
       })
     }catch(error){
+      this.initGlobals()
       return jsonResult((resolve, reject)=>{
         reject(error)
       })
@@ -73,11 +73,12 @@ class Auth{
     this._confirmAuthenticationCallback(jsonResult)
     try{
       let apiCallMethodResult = await apiCallMethod()
-      return new Promise((resolve) => {
-        resolve(apiCallMethodResult)
-      })
       eventEmitter.emitGeneric('REFRESH_TOKEN')
+      return new Promise((resolve) => {
+        resolve({status: 'REFRESHING'})
+      })
     } catch(error){
+      this.initGlobals()
       return  new Promise((resolve, reject) => {
         reject(error)
       })
@@ -100,7 +101,9 @@ class Auth{
       try {
         refreshTokenProcessed = await this._refreshTokenMethod()
         this.logger('CONFIRM REFRESH TOKEN ${refreshTokenProcessed}')
-        return Promise.resolve(this._confirmRefreshToken(refreshTokenProcessed, apiCallMethod))
+        return new Promise((resolve) => {
+          resolve(this._confirmRefreshToken(refreshTokenProcessed, apiCallMethod))
+        })
       } catch(err){
         this.logger(`CATCH REFRESH TOKEN ${JSON.stringify(err)}` )
         try {
@@ -192,8 +195,9 @@ class Auth{
   proxy(authData, apiMethod){
     __GLOBAL__REFRESH_TOKEN_OBJECT = undefined
     const eventCallback = () => {
-        let _authData = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(authData)
-        return this._proxyApi(_authData, apiMethod, eventCallback)
+      let _authData = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(authData)
+      this.logger(`proxy: calling _proxiApi`)
+      return this._proxyApi(_authData, apiMethod, eventCallback)
     }
 
     this.logger(`APPLICATION PARAMS IN PROXY = ${JSON.stringify(authData)}`)

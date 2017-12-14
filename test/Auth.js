@@ -142,14 +142,14 @@ describe('Auth', function(){
       logger('BEFORE REFRESH TOKEN PROCESS CALLBACK')
     }
 
-    const auth = new Auth(refreshTokenNoAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: true})
+    const auth = new Auth(refreshTokenNoAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
     let callRes
     try {
         callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth)
-        console.log(`AUTH FAIL => TRY AUTH`)
-        throw new Error('!!!!!!')
+        logger(`AUTH FAIL => TRY AUTH`)
+        throw new Error('Test fails: resolve instead of reject')
     } catch(err){
-        console.log(`AUTH FAIL => ERROR ${JSON.stringify(err)}`)
+        logger(`AUTH FAIL => ERROR ${JSON.stringify(err)}`)
         expect(err.status).to.be.equal(401)
         return err
     }
@@ -165,11 +165,11 @@ describe('Auth', function(){
       logger('BEFORE REFRESH TOKEN PROCESS CALLBACK')
     }
 
-    const auth = new Auth(refreshTokenAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: false})
+    const auth = new Auth(refreshTokenAuth, () => {}, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: true})
     let callRes
     try {
       callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth)
-      logger(`TRY AUTH => ${JSON.stringify(callRes)}`)
+      logger(`expect to process and post refresh token => TRY AUTH => ${JSON.stringify(callRes)}`)
     } catch(err){
       logger(`CATCH AUTH => ${JSON.stringify(err)}`)
       return err
