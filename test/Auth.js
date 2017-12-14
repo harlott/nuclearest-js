@@ -147,7 +147,7 @@ describe('Auth', function(){
     try {
         callRes = await auth.proxy({tokenObject:{accessToken: '11111'}}, fetchNoAuth)
         console.log(`AUTH FAIL => TRY AUTH`)
-        expect(true).to.be.equal(false)
+        throw new Error('!!!!!!')
     } catch(err){
         console.log(`AUTH FAIL => ERROR ${JSON.stringify(err)}`)
         expect(err.status).to.be.equal(401)
