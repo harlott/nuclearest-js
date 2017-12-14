@@ -29,8 +29,18 @@ class Auth{
     }
   }
 
-  _refreshTokenMethod(){
-    return this._refreshTokenApiCall()
+  async _refreshTokenMethod(){
+    let _refreshTokenApiCallProcessed = new Promise()
+    try {
+      let result = await this._refreshTokenApiCall()
+      return _refreshTokenApiCallProcessed((resolve) => {
+        resolve(result)
+      })
+    } catch(error){
+      return _refreshTokenApiCallProcessed((resolve, reject) => {
+        reject(error)
+      })
+    }
   }
 
   _authFailed(reason) {
