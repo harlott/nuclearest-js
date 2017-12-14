@@ -57,10 +57,19 @@ class Auth{
     __GLOBAL__REFRESH_TOKEN_OBJECT = {}
     __GLOBAL__REFRESH_TOKEN_OBJECT.tokenObject = cloneDeep(json)
     __GLOBAL__IS_REFRESHING_TOKEN = false
-    eventEmitter.emitGeneric('REFRESH_TOKEN')
     this._confirmAuthenticationCallback(jsonResult)
-
-    return apiCallMethod()
+    let apiCallMethodProcessed = new Promise()
+    try{
+      let apiCallMethodResult = await apiCallMethod()
+      return apiCallMethodProcessed((resolve) => {
+        resolve(apiCallMethodResult)
+      })
+      eventEmitter.emitGeneric('REFRESH_TOKEN')
+    } catch(error){
+      return  apiCallMethodProcessed((resolve, reject) => {
+        reject(error)
+      })
+    }
   }
 
   async _refreshTokenProcess(apiCallMethod, authData) {
