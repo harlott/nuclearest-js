@@ -42,7 +42,18 @@ class Auth{
   async _confirmRefreshToken(response, apiCallMethod){
     this.logger('INSIDE CONFIRM REFRESH TOKEN')
     this.logger(`CONFIRM REFRESH TOKEN => response is ${response}`)
-    const jsonResult = response.json !== undefined ? await response.json() : undefined
+    const jsonResult = new Promise()
+    try{
+      let jsonResultProcessed = response.json !== undefined ? await response.json() : undefined
+      return jsonResult((resolve) => {
+        resolve(jsonResultProcessed)
+      })
+    }catch(error){
+      return jsonResult((resolve, reject)=>{
+        reject(error)
+      })
+    }
+
     __GLOBAL__REFRESH_TOKEN_OBJECT = {}
     __GLOBAL__REFRESH_TOKEN_OBJECT.tokenObject = cloneDeep(json)
     __GLOBAL__IS_REFRESHING_TOKEN = false
