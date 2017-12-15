@@ -54,36 +54,20 @@ class Auth{
   }
 
   async _confirmRefreshToken(response){
-    this.logger('INSIDE CONFIRM REFRESH TOKEN')
-    this.logger(`CONFIRM REFRESH TOKEN => response is ${response}`)
+    this.logger('_confirmRefreshToken: prepare refreshToken confirmation...')
+    this.logger(`_confirmRefreshToken: response = ${response}`)
+
     try {
       let jsonResultProcessed = response.json !== undefined ? await response.json() : undefined
+      this._confirmAuthenticationCallback(jsonResultProcessed)
       return new Promise((resolve) => {
-        resolve(jsonResultProcessed)
+        resolve({status: 'ok'})
       })
     } catch(error){
       this.init()
-      return new Promise((resolve, reject)=>{
-        reject(error)
-      })
+      return this._authFailed(error)
     }
 
-    this._lastRefreshToken = {}
-    this._lastRefreshToken.tokenObject = cloneDeep(json)
-    this._tokenRefreshing = false
-    this._confirmAuthenticationCallback(jsonResult)
-    try{
-      let apiCallMethodResult = await apiCallMethod()
-
-      return new Promise((resolve) => {
-        resolve({status: 'REFRESHING'})
-      })
-    } catch(error){
-      this.init()
-      return  new Promise((resolve, reject) => {
-        reject(error)
-      })
-    }
   }
 
   async _refreshTokenProcess(authData) {
@@ -97,7 +81,7 @@ class Auth{
 
       if (this._lastRefreshToken !== undefined){
         return new Promise((resolve) => {
-          resolve({status: ok})
+          resolve({status: 'ok'})
         })
       }
       try {
