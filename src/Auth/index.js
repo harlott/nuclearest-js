@@ -90,15 +90,21 @@ class Auth{
       this.logger('IN REFRESH TOKEN PROCESS')
 
       this.logger('CALL REFRESH TOKEN METHOD')
+
       if (isFunction(this._options.beforeRefreshTokenCallback)){
         this._options.beforeRefreshTokenCallback()
       }
-      let refreshTokenProcessed
+
+      if (this._lastRefreshToken !== undefined){
+        return new Promise((resolve) => {
+          resolve({status: ok})
+        })
+      }
       try {
-        refreshTokenProcessed = await this._refreshTokenMethod()
+        this._lastRefreshToken = await this._refreshTokenMethod()
         this.logger('CONFIRM REFRESH TOKEN ${refreshTokenProcessed}')
         return new Promise((resolve) => {
-          resolve(this._confirmRefreshToken(refreshTokenProcessed, apiCallMethod))
+          resolve(this._confirmRefreshToken(this._lastRefreshToken))
         })
       } catch(err){
         this.logger(`CATCH REFRESH TOKEN ${JSON.stringify(err)}` )
@@ -116,7 +122,7 @@ class Auth{
 
         if (err.status === 401){
           this.logger('REFRESH TOKEN FAILS ')
-          return this._authFailed(refreshTokenProcessed)
+          return this._authFailed(this._lastRefreshToken)
         }
         return new Promise((resolve, reject) => {
           reject(err)
@@ -124,16 +130,17 @@ class Auth{
       }
   }
 
-  async _checkAuth(response, authData, eventCallback){
+  async _checkAuth(response, authData){
     this.logger(`CHECK AUTH RESPONSE => ${JSON.stringify(response)}`)
-    if (response.status === 401) {
-      let _authData = cloneDeep(this._lastRefreshToken) || cloneDeep(authData)
-      this.logger(`CHECK AUTH => params = ${JSON.stringify(_authData)}`)
-      if (this._tokenRefreshing === true) {
-          eventEmitter.on('REFRESH_TOKEN', eventCallback)
-          return new Promise((resolve) => {
-            resolve({status: 'REFRESHING'})
-          })
+    if (get(response, 'status') === 401) {
+      this.logger(`_checkAuth: params = ${JSON.stringify(authData)}`)
+      if (this._tokenRefreshing === false) {
+
+      } else {
+        eventEmitter.on('REFRESH_TOKEN', eventCallback)
+        return new Promise((resolve) => {
+          resolve({status: 'REFRESHING'})
+        })
       }
       this._tokenRefreshing = true
       this.logger('PROCESSING REFRESH TOKEN')
