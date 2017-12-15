@@ -56,7 +56,7 @@ class Auth{
       this._confirmAuthenticationCallback({tokenObject:lastRefreshToken})
       this._lastRefreshToken = {}
       return new Promise((resolve) => {
-        resolve({status: 'ok'})
+        resolve({status: 'SUCCESS'})
       })
     } catch(error){
       this.init()
@@ -69,7 +69,7 @@ class Auth{
     if (!isEmpty(this._lastRefreshToken)){
       this.logger('_refreshTokenProcess: already processed')
       return new Promise((resolve) => {
-        resolve({status: 'ok'})
+        resolve({status: 'SUCCESS'})
       })
     }
       this.logger('_refreshTokenProcess: prapare refresh token processing...')
