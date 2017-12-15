@@ -6,16 +6,24 @@ let __GLOBAL__IS_REFRESHING_TOKEN
 
 const eventEmitter = new Emitter()
 
+const AUTH_STATUS = {
+  'AUTH',
+  'NO_AUTH',
+  'REFRESHING'
+}
+
 class Auth{
   constructor(refreshTokenApiCall, confirmAuthenticationCallback, resetAuthenticationCallback, options={beforeRefreshTokenCallback: () => {}, debug: false}){
-
     if (isFunction(refreshTokenApiCall) === false){
       throw new Error('refreshTokenMethod parameter is required!')
     }
+
     this._refreshTokenApiCall = refreshTokenApiCall
     this._confirmAuthenticationCallback = confirmAuthenticationCallback
     this._resetAuthenticationCallback = resetAuthenticationCallback
     this._options = options
+    this._queue = []
+    this._authState = AUTH_STATUS.AUTH
   }
 
   initGlobals(){
