@@ -112,30 +112,17 @@ class Auth{
       }
   }
 
-  async _checkAuth(status, authData){
+  async _checkAuth(response, authData){
     this.logger(`CHECK AUTH RESPONSE => ${JSON.stringify(response)}`)
-    if (status === 401) {
-      this.logger(`_checkAuth: params = ${JSON.stringify(authData)}`)
-      if (this._tokenRefreshing === false) {
-
-      } else {
-        eventEmitter.on('REFRESH_TOKEN', eventCallback)
-        return new Promise((resolve) => {
-          resolve({status: 'REFRESHING'})
-        })
-      }
-      this._tokenRefreshing = true
-      this.logger('PROCESSING REFRESH TOKEN')
+    if (get(response, 'status') === 401) {
       try {
         let _refreshTokenProcessed = await this._refreshTokenProcess(authData)
         this.logger(`_checkAuth: _refreshTokenProcessed = ${JSON.stringify(_refreshTokenProcessed)}`)
-        return new Promise((resolve) => {
-          resolve(_refreshTokenProcessed)
-        })
+        return _refreshTokenProcessed
       } catch(err){
         console.log(`_checkAuth: REFRESH TOKEN ERROR => ${JSON.stringify(err)}`)
         return new Promise((resolve, reject) => {
-          reject(err)
+          reject(response)
         })
       }
     }
@@ -160,7 +147,7 @@ class Auth{
       const status = get(response, 'status')
       if (status === 401){
         this.logger('_proxyApi: ERROR: calling this._checkAuth')
-        const checkedAuth = await this._checkAuth(status, authData)
+        const checkedAuth = await this._checkAuth(response, authData)
       }
       this.logger('_proxyApi: ERROR: return apiMethod response')
       return new Promise((resolve, reject) => {
@@ -179,9 +166,14 @@ class Auth{
       })
     }
     try {
-      const couldProceed = await this._proxyApi(authData, apiMethod)
+      const proxyApiProcessed = await this._proxyApi(authData, apiMethod)
+      return new Promise((resolve) => {
+        resolve(proxyApiProcessed)
+      })
     } catch(error){
-
+      return new Promise((resolve, reject) => {
+        reject(error)
+      })
     }
 
   }
