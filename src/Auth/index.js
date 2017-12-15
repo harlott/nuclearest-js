@@ -71,9 +71,7 @@ class Auth{
   }
 
   async _refreshTokenProcess(authData) {
-      this.logger('IN REFRESH TOKEN PROCESS')
-
-      this.logger('CALL REFRESH TOKEN METHOD')
+      this.logger('_refreshTokenProcess: prapare refresh token processing...')
 
       if (isFunction(this._options.beforeRefreshTokenCallback)){
         this._options.beforeRefreshTokenCallback()
@@ -114,9 +112,9 @@ class Auth{
       }
   }
 
-  async _checkAuth(response, authData){
+  async _checkAuth(status, authData){
     this.logger(`CHECK AUTH RESPONSE => ${JSON.stringify(response)}`)
-    if (get(response, 'status') === 401) {
+    if (status === 401) {
       this.logger(`_checkAuth: params = ${JSON.stringify(authData)}`)
       if (this._tokenRefreshing === false) {
 
@@ -128,9 +126,8 @@ class Auth{
       }
       this._tokenRefreshing = true
       this.logger('PROCESSING REFRESH TOKEN')
-      let _refreshTokenProcessed
       try {
-        _refreshTokenProcessed = await this._refreshTokenProcess(eventCallback, _authData)
+        let _refreshTokenProcessed = await this._refreshTokenProcess(authData)
         this.logger(`_checkAuth: _refreshTokenProcessed = ${JSON.stringify(_refreshTokenProcessed)}`)
         return new Promise((resolve) => {
           resolve(_refreshTokenProcessed)
@@ -160,9 +157,10 @@ class Auth{
     } catch(error) {
       let response = cloneDeep(error)
       this.logger(`_proxyApi: ERROR: response = ${JSON.stringify(response)}`)
-      if (get(response, 'status') === 401){
+      const status = get(response, 'status')
+      if (status === 401){
         this.logger('_proxyApi: ERROR: calling this._checkAuth')
-        return this._checkAuth(response, authData)
+        const checkedAuth = await this._checkAuth(status, authData)
       }
       this.logger('_proxyApi: ERROR: return apiMethod response')
       return new Promise((resolve, reject) => {
@@ -171,7 +169,7 @@ class Auth{
     }
   }
 
-  proxy(authData, apiMethod){
+  async proxy(authData, apiMethod){
     this.logger(`proxy: in this._tokenRefreshing => ${this._tokenRefreshing}`)
     this.logger(`proxy: calling _proxiApi with authData = ${authData}`)
     if (get(authData, 'tokenObject.accessToken') === undefined && get(authData, 'tokenObject.refreshToken') === undefined) {
@@ -180,7 +178,12 @@ class Auth{
         message: 'tokenObject is undefined'
       })
     }
-    return this._proxyApi(authData, apiMethod)
+    try {
+      const couldProceed = await this._proxyApi(authData, apiMethod)
+    } catch(error){
+
+    }
+
   }
 }
 
