@@ -43,22 +43,18 @@ class Auth{
   }
 
   _authFailed(reason) {
-    this._tokenRefreshing = false
     this._resetAuthenticationCallback()
     return new Promise((resolve, reject)=>{
       reject(reason)
     })
   }
 
-  async _confirmRefreshToken(response){
+  async _confirmRefreshToken(lastRefreshToken){
     this.logger('_confirmRefreshToken: prepare refreshToken confirmation...')
-
-
     try {
-
-      this.logger(`_confirmRefreshToken: response = ${JSON.stringify(response)}`)
-      let jsonResultProcessed = response.json !== undefined ? await response.json() : undefined
-      this._confirmAuthenticationCallback({tokenObject:jsonResultProcessed})
+      this.logger(`_confirmRefreshToken: refresh token = ${JSON.stringify(lastRefreshToken)}`)
+      this._confirmAuthenticationCallback({tokenObject:lastRefreshToken})
+      this._lastRefreshToken = {}
       return new Promise((resolve) => {
         resolve({status: 'ok'})
       })
@@ -66,7 +62,6 @@ class Auth{
       this.init()
       return this._authFailed(error)
     }
-
   }
 
   async _refreshTokenProcess() {
@@ -83,9 +78,9 @@ class Auth{
         this._options.beforeRefreshTokenCallback()
       }
 
-
       try {
-        this._lastRefreshToken = await this._refreshTokenMethod()
+        const refreshTokenResponse = await this._refreshTokenMethod()
+        this._lastRefreshToken = await refreshTokenResponse.json()
         this.logger(`_refreshTokenProcess: confirm with refresh token ${JSON.stringify(this._lastRefreshToken)}`)
         try {
           const confirmedRefreshToken = await this._confirmRefreshToken(this._lastRefreshToken)
@@ -100,10 +95,10 @@ class Auth{
       } catch(err){
         this.logger(`CATCH REFRESH TOKEN ${JSON.stringify(err)}` )
         try {
-          //let errorProcessed = await err
+          let errorProcessed = await err
           this.logger(`_refreshTokenProcess: ERROR: errorProcessed = ${JSON.stringify(err)}`)
           return new Promise((resolve, reject) => {
-            reject(err)
+            reject(errorProcessed)
           })
         } catch(errorFormRefresh){
           return new Promise((resolve, reject) => {

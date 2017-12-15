@@ -53,6 +53,7 @@ describe('Auth', function(){
 
   const fetchNoAuth  = () => {
       let authData = getAuthData()
+    console.log(`fetchNoAuth: authData = ${JSON.stringify(authData)}`)
       if (authData.tokenObject.accessToken === '11111'){
         return new Promise((resolve, reject) => {
           reject({
@@ -124,10 +125,11 @@ describe('Auth', function(){
   let tokenRefreshed = {tokenObject:{accessToken: '11111'}}
 
   const authConfirmCallback = (newTokenObject) => {
-    return cloneDeep(newTokenObject)
+    tokenRefreshed = cloneDeep(newTokenObject)
   }
 
   it('expect to execute api method with authorization granted', async () => {
+    tokenRefreshed = {tokenObject:{accessToken: '11111'}}
     const auth = new Auth(() => {}, () => {}, () => {}, {beforeRefreshTokenCallback: () => {}, debug: false})
     const callRes = await auth.proxy(getAuthData, fetchAuth)
     console.log(`CALL RES = ${JSON.stringify(callRes)}`)
@@ -135,6 +137,7 @@ describe('Auth', function(){
   })
 
   it('expect to execute error callback with error status', async () => {
+    tokenRefreshed = {tokenObject:{accessToken: '11111'}}
     const auth = new Auth(() => {}, () => {}, () => {}, {beforeRefreshTokenCallback: () => {}, debug: false})
     let callRes
     try{
@@ -148,6 +151,7 @@ describe('Auth', function(){
   })
 
   it('expect to process and fail refresh token with authorization failed', async () => {
+    tokenRefreshed = {tokenObject:{accessToken: '11111'}}
     const resetAuthentication = () => {
       logger('RESET AUTHENTICATION - END')
     }
@@ -172,7 +176,7 @@ describe('Auth', function(){
   })
 
   it('expect to process and post refresh token', async () => {
-
+    tokenRefreshed = cloneDeep({tokenObject:{accessToken: '11111'}})
 
     const resetAuthentication = () => {
       logger('RESET AUTHENTICATION - END')
@@ -195,7 +199,7 @@ describe('Auth', function(){
 
   it('expect to fail authentication, post refresh token and process multiple calls ', async () => {
     let hasDone = false
-
+    tokenRefreshed = cloneDeep({tokenObject:{accessToken: '11111'}})
     const processAsync = () => {
       if (hasDone === false){
         hasDone = true
@@ -218,23 +222,15 @@ describe('Auth', function(){
         } catch(err){
           console.log('ERR')
         }
-
     }
   })
 
   it('expect to fail authentication, fail refresh token and process any call', async () => {
     let hasDone = false
-
-    const processAsync = () => {
-      if (hasDone === false){
-        hasDone = true
-        done()
-      }
-    }
+    tokenRefreshed = cloneDeep({tokenObject:{accessToken: '11111'}})
 
     const resetAuthentication = () => {
       logger('RESET AUTHENTICATION - END')
-      processAsync()
     }
 
     const beforeRefreshTokenCallback = () => {
@@ -243,7 +239,11 @@ describe('Auth', function(){
 
     const auth = new Auth(refreshTokenNoAuth, authConfirmCallback, resetAuthentication, {beforeRefreshTokenCallback: beforeRefreshTokenCallback, debug: true})
     for (let i=0; i < 10; i += 1){
+      try {
         const callRes = await auth.proxy(getAuthData, fetchNoAuth)
+      } catch(err){
+        console.log('ERR')
+      }
     }
   })
 
