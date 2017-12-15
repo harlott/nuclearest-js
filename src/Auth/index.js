@@ -88,12 +88,7 @@ class Auth{
 
   async _refreshTokenProcess(authData) {
       this.logger('IN REFRESH TOKEN PROCESS')
-      if (get(authData, 'tokenObject.accessToken') === undefined && get(authData, 'tokenObject.refreshToken') === undefined) {
-        return this._authFailed({
-          code: 'TOKEN_OBJECT_NOT_DEFINED',
-          message: 'tokenObject is undefined'
-        })
-      }
+
       this.logger('CALL REFRESH TOKEN METHOD')
       if (isFunction(this._options.beforeRefreshTokenCallback)){
         this._options.beforeRefreshTokenCallback()
@@ -163,23 +158,22 @@ class Auth{
   }
 
   async _proxyApi(authData, apiMethod){
-    let _authData = this._lastRefreshToken || authData
-    this.logger(`_proxyApi => appParams = ${JSON.stringify(_authData)}`)
+    this.logger(`_proxyApi => appParams = ${JSON.stringify(authData)}`)
     let resApiMethod
     try{
-        resApiMethod = await apiMethod(_authData)
-        this.logger(`resApiMethod = ${JSON.stringify(resApiMethod)}`)
+        resApiMethod = await apiMethod(authData)
+        this.logger(`_proxyApi: SUCCESS: resApiMethod = ${JSON.stringify(resApiMethod)}`)
         return new Promise((resolve) => {
           resolve(resApiMethod)
         })
     } catch(error) {
-      this.init()
       let response = cloneDeep(error)
-      this.logger(`_proxyApi ERROR = ${JSON.stringify(response)}`)
+      this.logger(`_proxyApi: ERROR: response = ${JSON.stringify(response)}`)
       if (get(response, 'status') === 401){
-        this.logger('CHECK AUTH')
-        return this._checkAuth(response, _authData)
+        this.logger('_proxyApi: ERROR: calling this._checkAuth')
+        return this._checkAuth(response, authData)
       }
+      this.logger('_proxyApi: ERROR: return apiMethod response')
       return new Promise((resolve, reject) => {
         reject(response)
       })
@@ -189,9 +183,13 @@ class Auth{
   proxy(authData, apiMethod){
     this.logger(`proxy: in this._tokenRefreshing => ${this._tokenRefreshing}`)
     this.logger(`proxy: calling _proxiApi with authData = ${authData}`)
-
-    let _authData = cloneDeep(this._lastRefreshToken) || cloneDeep(authData)
-    return this._proxyApi(_authData, apiMethod)
+    if (get(authData, 'tokenObject.accessToken') === undefined && get(authData, 'tokenObject.refreshToken') === undefined) {
+      return this._authFailed({
+        code: 'TOKEN_OBJECT_NOT_DEFINED',
+        message: 'tokenObject is undefined'
+      })
+    }
+    return this._proxyApi(authData, apiMethod)
   }
 }
 
