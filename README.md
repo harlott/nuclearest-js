@@ -1,4 +1,4 @@
-NucleaRest JS v0.3.0-alpha
+NucleaRest JS v0.6.0-alpha
 ===================
 
 
@@ -87,8 +87,8 @@ You can also create and use your own.
   import Storage, {STORAGE_TYPES} from 'nuclearest-js/Storage'
 
   const cookieStorage = new Storage(STORAGE_TYPES.COOKIE, window.cookie, undefined, {enabled: true, 'grantedProps':['country'], callbackOnDisabled: () => {alert('COOKIE DISABLED')}})
-  cookieStorage.setItem('country', 'IT')
   cookieStorage.setItem('accessToken', 'aaaa-bbbb-cccc-dddd')
+  cookieStorage.setItem('country', 'IT')
 
  ```
 
@@ -245,5 +245,6 @@ Example
 
 
 #### Next Releases
-- fetch response object: no diff with original fetch   
+- fetch response object: no diff with original fetch, only potetial 2 flags more: isJson and isText to better handle response
+- fetch response status handling: delegate to a responseParser, for better customizations   
 - Runtime Mocking System
