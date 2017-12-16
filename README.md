@@ -1,4 +1,4 @@
-NucleaRest JS v0.6.0-alpha
+NucleaRest JS v0.6.0-alpha https://travis-ci.org/harlott/nuclearest-js.svg?branch=master
 ===================
 
 
