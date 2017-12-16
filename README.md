@@ -177,7 +177,14 @@ Example
 
 
 
-   const cookieStorage = new Storage(STORAGE_TYPES.COOKIE, window.cookie, undefined, {enabled: true, 'grantedProps':['country'], callbackOnDisabled: () => {alert('COOKIE DISABLED')}})
+   const cookieStorage = new Storage(STORAGE_TYPES.COOKIE,
+                                     window.cookie,
+                                     undefined,
+                                     {
+                                       enabled: true,
+                                       'grantedProps': ['country'],
+                                       callbackOnDisabled: () => {alert('COOKIE DISABLED')}
+                                     })
 
    let headers = new Headers()
                     .add()
@@ -209,7 +216,9 @@ Example
      return cookieStorage.getItem('tokenObject')
    }
 
-   const auth = new Auth(refreshTokenApiCall, confirmAuthenticationCallback, resetAuthenticationCallback)
+   const auth = new Auth(refreshTokenApiCall,
+                         confirmAuthenticationCallback,
+                         resetAuthenticationCallback)
 
    const getContents = () => {
        return fetch('/contents', {
