@@ -5,7 +5,7 @@ import { cloneDeep, isFunction, get, isEmpty } from 'lodash'
 const eventEmitter = new Emitter()
 
 class Auth{
-  constructor(refreshTokenApiCall, confirmAuthenticationCallback, resetAuthenticationCallback, options={beforeRefreshTokenCallback: () => {}, debug: false}){
+  constructor(refreshTokenApiCall, confirmAuthenticationCallback, resetAuthenticationCallback, options={beforeRefreshTokenCallback: () => {}}){
     if (isFunction(refreshTokenApiCall) === false){
       throw new Error('refreshTokenMethod parameter is required!')
     }
@@ -21,43 +21,25 @@ class Auth{
     this._lastRefreshToken = {}
   }
 
-  logger(output){
-    if (get(this._options, 'debug', false) === true){
-      console.log(output)
-    }
-  }
-
   async _refreshTokenMethod(){
     try {
       const result = await this._refreshTokenApiCall()
-      this.logger(`_refreshTokenMethod: SUCCESS: result = ${JSON.stringify(result)}`)
-      return new Promise((resolve) => {
-        resolve(result)
-      })
+      return Promise.resolve(result)
     } catch(error){
-      this.logger(`_refreshTokenMethod: ERROR: result = ${JSON.stringify(error)}`)
-      return new Promise((resolve, reject) => {
-        reject(error)
-      })
+      return Promise.reject(error)
     }
   }
 
   _authFailed(reason) {
     this._resetAuthenticationCallback()
-    return new Promise((resolve, reject)=>{
-      reject(reason)
-    })
+    return Promise.reject(reason)
   }
 
   async _confirmRefreshToken(lastRefreshToken){
-    this.logger('_confirmRefreshToken: prepare refreshToken confirmation...')
     try {
-      this.logger(`_confirmRefreshToken: refresh token = ${JSON.stringify(lastRefreshToken)}`)
       this._confirmAuthenticationCallback({tokenObject:lastRefreshToken})
       this._lastRefreshToken = {}
-      return new Promise((resolve) => {
-        resolve({status: 'SUCCESS'})
-      })
+      return Promise.resolve({status: 'SUCCESS'})
     } catch(error){
       this.init()
       return this._authFailed(error)
@@ -65,127 +47,89 @@ class Auth{
   }
 
   async _refreshTokenProcess() {
-    this.logger(`_refreshTokenProcess: this._lastRefreshToken = ${JSON.stringify(this._lastRefreshToken)}`)
-    if (!isEmpty(this._lastRefreshToken)){
-      this.logger('_refreshTokenProcess: already processed')
-      return new Promise((resolve) => {
-        resolve({status: 'SUCCESS'})
-      })
-    }
-      this.logger('_refreshTokenProcess: prapare refresh token processing...')
+    try {
+      if (!isEmpty(this._lastRefreshToken)){
+        return Promise.resolve({status: 'SUCCESS'})
+      }
 
       if (isFunction(this._options.beforeRefreshTokenCallback)){
         this._options.beforeRefreshTokenCallback()
       }
 
-      try {
-        const refreshTokenResponse = await this._refreshTokenMethod()
-        this._lastRefreshToken = await refreshTokenResponse.json()
-        this.logger(`_refreshTokenProcess: confirm with refresh token ${JSON.stringify(this._lastRefreshToken)}`)
-        try {
-          const confirmedRefreshToken = await this._confirmRefreshToken(this._lastRefreshToken)
-          return new Promise((resolve) => {
-            resolve(confirmedRefreshToken)
-          })
-        } catch(err){
-          return new Promise((resolve, reject) => {
-            reject(err)
-          })
-        }
-      } catch(err){
-        this.logger(`CATCH REFRESH TOKEN ${JSON.stringify(err)}` )
-        try {
-          let errorProcessed = await err
-          this.logger(`_refreshTokenProcess: ERROR: errorProcessed = ${JSON.stringify(err)}`)
-          return new Promise((resolve, reject) => {
-            reject(errorProcessed)
-          })
-        } catch(errorFormRefresh){
-          return new Promise((resolve, reject) => {
-            reject(errorFormRefresh)
-          })
-        }
+      const refreshTokenResponse = await this._refreshTokenMethod()
+      this._lastRefreshToken = await refreshTokenResponse.json()
+      const confirmedRefreshToken = await this._confirmRefreshToken(this._lastRefreshToken)
 
-        if (err.status === 401){
-          this.logger('REFRESH TOKEN FAILS ')
-          return this._authFailed(this._lastRefreshToken)
-        }
-        return new Promise((resolve, reject) => {
-          reject(err)
-        })
+      return Promise.resolve(confirmedRefreshToken)
+    } catch(err){
+      try {
+        let errorProcessed = await err
+        return Promise.reject(errorProcessed)
+      } catch(errorFormRefresh){
+        return Promise.reject(errorFormRefresh)
       }
+
+      if (err.status === 401){
+        return this._authFailed(this._lastRefreshToken)
+      }
+      return Promise.reject(err)
+    }
   }
 
   async _checkAuth(response, getAuthData){
-    this.logger(`_checkAuth: response => ${JSON.stringify(response)}`)
-    if (get(response, 'status') === 401) {
-      try {
+    try {
+      if (get(response, 'status') === 401) {
         let _refreshTokenProcessed = await this._refreshTokenProcess()
-        this.logger(`_checkAuth: _refreshTokenProcessed = ${JSON.stringify(_refreshTokenProcessed)}`)
         return _refreshTokenProcessed
-      } catch(err){
-        console.log(`_checkAuth: REFRESH TOKEN ERROR => ${JSON.stringify(err)}`)
-        return new Promise((resolve, reject) => {
-          reject(response)
-        })
       }
+    } catch(err){
+      return Promise.reject(response)
     }
 
-    return new Promise((resolve) => {
-      resolve(response)
-    })
+    return new Promise.resolve(response)
   }
 
   async _proxyApi(getAuthData, apiMethod){
-    this.logger(`_proxyApi => appParams = ${JSON.stringify(getAuthData())}`)
-    let resApiMethod
     try{
-        resApiMethod = await apiMethod(getAuthData())
-        this.logger(`_proxyApi: SUCCESS: resApiMethod = ${JSON.stringify(resApiMethod)}`)
-        return new Promise((resolve) => {
-          resolve(resApiMethod)
-        })
+        const resApiMethod = await apiMethod(getAuthData())
+        return Promise.resolve(resApiMethod)
     } catch(error) {
       let response = cloneDeep(error)
-      this.logger(`_proxyApi: ERROR: response = ${JSON.stringify(response)}`)
       const status = get(response, 'status')
-      if (status === 401){
-        this.logger('_proxyApi: ERROR: calling this._checkAuth')
+      if (status === undefined) {
+        throw new Error('Unexpected exception!!!')
+      } else if (status === 401){
         try {
           const checkedAuth = await this._checkAuth(response, getAuthData)
           return apiMethod()
         } catch(err){
-          return new Promise((resolve, reject) => {
-            reject(err)
-          })
+          return Promise.reject(err)
         }
-
+      } else {
+          return Promise.reject(response)
       }
-      this.logger(`_proxyApi: ERROR: return apiMethod ${JSON.stringify(error)}`)
-      return new Promise((resolve, reject) => {
-        reject(response)
-      })
     }
   }
 
   async proxy(getAuthData, apiMethod){
-    const authData = getAuthData()
-    this.logger(`proxy: calling _proxiApi with authData = ${JSON.stringify(getAuthData())}`)
-    if (get(authData, 'tokenObject.accessToken') === undefined && get(getAuthData(), 'tokenObject.refreshToken') === undefined) {
-      return this._authFailed({
-        code: 'TOKEN_OBJECT_NOT_DEFINED',
-        message: 'tokenObject is undefined'
-      })
-    }
     try {
+      const authData = getAuthData()
+      if (get(authData, 'tokenObject.accessToken') === undefined && get(getAuthData(), 'tokenObject.refreshToken') === undefined) {
+        return this._authFailed({
+          code: 'TOKEN_OBJECT_NOT_DEFINED',
+          message: 'tokenObject is undefined'
+        })
+      }
+
       const proxyApiProcessed = await this._proxyApi(getAuthData, apiMethod)
-      return new Promise((resolve) => {
-        resolve(proxyApiProcessed)
-      })
+      return  Promise.resolve(proxyApiProcessed)
     } catch(error){
-      return new Promise((resolve, reject) => {
-        reject(error)
-      })
+      try {
+        const errorProcessed = await error
+      } catch (err){
+        return
+      }
+      return Promise.reject(error)
     }
 
   }
