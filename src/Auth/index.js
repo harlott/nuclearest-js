@@ -1,168 +1,214 @@
-import Emitter from '../services/Emitter'
-import { cloneDeep, isFunction, get } from 'lodash'
+import { cloneDeep, isFunction, get, isEmpty } from 'lodash'
 
-let __GLOBAL__REFRESH_TOKEN_OBJECT
-let __GLOBAL__IS_REFRESHING_TOKEN
-let _applicationParams = null
-
-const eventEmitter = new Emitter()
-
+/**
+ * This is an utility to handle refresh authentication token processing.
+ * The first unauthorized call pauses all the following, waiting for receiving new token object
+ * Using es7 async await
+ * @type {Object}
+ *
+ * @example
+ *
+ *  import Storage, {STORAGE_TYPES} from 'nuclearest-js/Storage'
+ *  import fetch from 'nuclearest-js/fetch'
+ *  import Headers, {headersMap} from 'nuclearest-js/Headers'
+ *
+ *  // In a real world authData,CookieStorage, Headers and Auth instances are imported from a service
+ *
+ *  let authData = {
+ *    tokenObject:{
+ *      tokenType: 'Bearer',
+ *      accessToken: 'a1b2-c3d4-e5f6-g7h8',
+ *      refreshToken: 'k1k2-j3j4-l5l6-p7p8',
+ *      expiresIn: '2000',
+ *      scope: 'user.role'
+ *    }
+ *  }
+ *
+ *
+ *
+ *  const cookieStorage = new Storage(STORAGE_TYPES.COOKIE, window.cookie, undefined, {enabled: true, 'grantedProps':['country'], callbackOnDisabled: () => {alert('COOKIE DISABLED')}})
+ *
+ *  let headers = new Headers()
+ *                   .add()
+ *                   .oauthToken(authData.tokenObject)
+ *                   .custom('x-application-id', clientData.applicationId)
+ *                   .use()
+ *
+ *  const refreshTokenApiCall = () => {
+ *    return fetch('/my-refresh-token', {
+ *      headers: headers,
+ *      method: 'POST',
+ *      body: JSON.stringify({
+ *          refreshToken: authData.tokenObject.refreshToken
+ *      })
+ *    })
+ *  }
+ *
+ *  const confirmAuthenticationCallback = (tokenObject) => {
+ *    cookieStorage.setItem('tokenObject', tokenObject)
+ *    authData.tokenObject = Object.assign({}, tokenObject)
+ *  }
+ *
+ *  const resetAuthenticationCallback = () => {
+ *    cookieStorage.removeItem('tokenObject')
+ *    location.href = '/login'
+ *  }
+ *
+ *  const getAuthData = () => {
+ *    return cookieStorage.getItem('tokenObject')
+ *  }
+ *
+ *  const auth = new Auth(refreshTokenApiCall, confirmAuthenticationCallback, resetAuthenticationCallback)
+ *
+ *  const getContents = () => {
+ *      return fetch('/contents', {
+ *      headers: headers,
+ *      method: 'GET'
+ *    })
+ *  }
+ *
+ *  const processContents = async () => {
+ *     try {
+ *        const contentsResult = await auth.proxy(getAuthData, getContents)
+ *        // Do your staff here to handle response
+ *        const jsonResult = await contentsResult.json()
+ *        console.log(JSON.stringify(jsonResult))
+ *     } catch(error){
+ *        // Do your staff here to handle exceptions
+ *     }
+ *  }
+ *
+ *  processContents()
+ *
+ */
 class Auth{
-  constructor(refreshTokenMethod, confirmAuthenticationCallback, resetAuthenticationCallback, options={beforeRefreshTokenCallback: () => {}, debug: false}){
-
-    if (isFunction(refreshTokenMethod) === false){
+  constructor(refreshTokenApiCall, confirmAuthenticationCallback, resetAuthenticationCallback, options={beforeRefreshTokenCallback: () => {}}){
+    if (isFunction(refreshTokenApiCall) === false){
       throw new Error('refreshTokenMethod parameter is required!')
     }
-    this._refreshTokenMethod = refreshTokenMethod
+
+    this._refreshTokenApiCall = refreshTokenApiCall
     this._confirmAuthenticationCallback = confirmAuthenticationCallback
     this._resetAuthenticationCallback = resetAuthenticationCallback
     this._options = options
+    this._lastRefreshToken = {}
   }
 
-  logger(output){
-    if (get(this._options, 'debug', false) === true){
-      console.log(output)
+  init(){
+    this._lastRefreshToken = {}
+  }
+
+  async _refreshTokenMethod(){
+    try {
+      const result = await this._refreshTokenApiCall()
+      return Promise.resolve(result)
+    } catch(error){
+      return Promise.reject(error)
     }
   }
 
-  _checkAccessToken(applicationParams){
-    if (applicationParams.authData.tokenObject === undefined && (isFunction(applicationParams.clientData.redirectWithNoAuthCallback) === true)) {
-        return applicationParams.clientData.redirectWithNoAuthCallback()
-    }
-  }
-
-  _redirectWithNoAuth(applicationParams){
-    if (isFunction(applicationParams.clientData.redirectWithNoAuthCallback) === true) {
-        return applicationParams.clientData.redirectWithNoAuthCallback()
-    }
-  }
-
-  _authFailed(applicationParams) {
-    __GLOBAL__IS_REFRESHING_TOKEN = false
+  _authFailed(reason) {
     this._resetAuthenticationCallback()
+    return Promise.reject(reason)
   }
 
-  _confirmRefreshToken(response, apiCallMethod, clientData, xhrOptions, authData){
-    this.logger('INSIDE CONFIRM REFRESH TOKEN')
-    response.json().then((json) => {
-      __GLOBAL__REFRESH_TOKEN_OBJECT = {}
-      __GLOBAL__REFRESH_TOKEN_OBJECT.authData = {}
-      __GLOBAL__REFRESH_TOKEN_OBJECT.authData.tokenObject = cloneDeep(json)
-      __GLOBAL__IS_REFRESHING_TOKEN = false
-      eventEmitter.emitGeneric('REFRESH_TOKEN')
-      apiCallMethod()
-
-      this._confirmAuthenticationCallback(json)
-    })
+  async _confirmRefreshToken(lastRefreshToken){
+    try {
+      this._confirmAuthenticationCallback({tokenObject:lastRefreshToken})
+      this._lastRefreshToken = {}
+      return Promise.resolve({status: 'SUCCESS'})
+    } catch(error){
+      this.init()
+      return this._authFailed(error)
+    }
   }
 
-  _refreshTokenProcess(apiCallMethod, promiseCallback, clientData, xhrOptions, authData) {
-      this.logger('IN REFRESH TOKEN PROCESS')
-      if (authData.tokenObject === undefined) {
-        return this._authFailed()
+  async _refreshTokenProcess() {
+    try {
+      if (!isEmpty(this._lastRefreshToken)){
+        return Promise.resolve({status: 'SUCCESS'})
       }
-      this.logger('CALL REFRESH TOKEN METHOD')
+
       if (isFunction(this._options.beforeRefreshTokenCallback)){
         this._options.beforeRefreshTokenCallback()
       }
-      this._refreshTokenMethod()
-      .then((response) => {
-        this.logger(`REFRESH TOKEN PROMISE SOLVED: response.status is ${response.status}`)
-        if (response.ok === false) {
-          this.logger('REFRESH TOKEN FAILS')
-          return this._authFailed()
-        }
-        this.logger('CONFIRM REFRESH TOKEN')
-        this._confirmRefreshToken(response, apiCallMethod, clientData, xhrOptions, authData)
-      })
-      .catch(
-        (err) => {
-          this.logger(err)
-          this.logger('ERROR IN REFRESH TOKEN')
-          return this._authFailed({authData: authData})
-        }
-      ).then(()=>{
-        this.logger('REFRESH TOKEN DONE')
-      });
-  }
 
-  _checkAuth(json, statusCode, applicationParams, eventCallback, errorCallback, apiCallback){
-    if (statusCode === 401) {
-      _applicationParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
-      this.logger(`CHECK AUTH => params = ${_applicationParams}`)
-      if (__GLOBAL__IS_REFRESHING_TOKEN === true) {
-          return eventEmitter.on('REFRESH_TOKEN', eventCallback)
+      const refreshTokenResponse = await this._refreshTokenMethod()
+      this._lastRefreshToken = await refreshTokenResponse.json()
+      const confirmedRefreshToken = await this._confirmRefreshToken(this._lastRefreshToken)
+
+      return Promise.resolve(confirmedRefreshToken)
+    } catch(err){
+      try {
+        let errorProcessed = await err
+        return Promise.reject(errorProcessed)
+      } catch(errorFormRefresh){
+        return Promise.reject(errorFormRefresh)
       }
-      __GLOBAL__IS_REFRESHING_TOKEN = true
-      this.logger('PROCESSING REFRESH TOKEN')
-      return this._refreshTokenProcess(eventCallback, apiCallback, _applicationParams.clientData, _applicationParams.xhrOptions, _applicationParams.authData)
-    } else {
-      return errorCallback(json, statusCode)
+
+      if (err.status === 401){
+        return this._authFailed(this._lastRefreshToken)
+      }
+      return Promise.reject(err)
     }
   }
 
-  _proxyApi(applicationParams, apiCallback, apiMethod, eventCallback){
-    let appParams = __GLOBAL__REFRESH_TOKEN_OBJECT || applicationParams
-    this.logger(`_proxyApi => appParams = ${JSON.stringify(appParams)}`)
-    const executeApiMethod =  (authData) => {
-        this.logger('EXECUTE API METHOD')
-        return apiMethod(authData)
+  async _checkAuth(response, getAuthData){
+    try {
+      if (get(response, 'status') === 401) {
+        let _refreshTokenProcessed = await this._refreshTokenProcess()
+        return _refreshTokenProcessed
+      }
+    } catch(err){
+      return Promise.reject(response)
     }
 
-    return executeApiMethod(appParams.authData).then(
-        response => {
-            eventEmitter.removeListener('REFRESH_TOKEN', eventCallback)
-            return apiCallback(response)
-        }
-    ).catch((err) => {
-      this.logger(` CATCHING API METHOD WITH ERROR ${JSON.stringify(err)}`)
-      return apiCallback(err)
-    });
+    return new Promise.resolve(response)
   }
 
-  proxy(applicationParams, apiMethod, successCallback, errorCallback){
-    __GLOBAL__REFRESH_TOKEN_OBJECT = undefined
-    this._redirectWithAuthenticationFailed = false
-    this._checkAccessToken(applicationParams)
-
-    const eventCallback = () => {
-        let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
-        return this._proxyApi(newAppParams, apiCallback, apiMethod, eventCallback)
-    }
-
-    const apiCallback = (response, notApiResponse) => {
-        this.logger('INSIDE API CALLBACK')
-        let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
-        if (response !== undefined) {
-            if (response.status === 204) {
-                successCallback({})
-            }
-            else {
-              if (response.ok === true) {
-                  successCallback(response.json, response)
-              }
-              else {
-                this.logger('CHECK AUTH')
-                  return this._checkAuth(response.json, response.status, newAppParams, eventCallback, errorCallback, apiCallback)
-              }
-            }
-        } else if (notApiResponse !== undefined) {
-            errorCallback(notApiResponse.json, notApiResponse.statusCode)
-        } else {
-            return null
+  async _proxyApi(getAuthData, apiMethod){
+    try{
+        const resApiMethod = await apiMethod(getAuthData())
+        return Promise.resolve(resApiMethod)
+    } catch(error) {
+      let response = cloneDeep(error)
+      const status = get(response, 'status')
+      if (status === undefined) {
+        throw new Error('Unexpected exception!!!')
+      } else if (status === 401){
+        try {
+          const checkedAuth = await this._checkAuth(response, getAuthData)
+          return apiMethod()
+        } catch(err){
+          return Promise.reject(err)
         }
+      } else {
+          return Promise.reject(response)
+      }
+    }
+  }
+
+  async proxy(getAuthData, apiMethod){
+    try {
+      const authData = getAuthData()
+      if (get(authData, 'tokenObject.accessToken') === undefined && get(getAuthData(), 'tokenObject.refreshToken') === undefined) {
+        return this._authFailed({
+          code: 'TOKEN_OBJECT_NOT_DEFINED',
+          message: 'tokenObject is undefined'
+        })
+      }
+
+      const proxyApiProcessed = await this._proxyApi(getAuthData, apiMethod)
+      return  Promise.resolve(proxyApiProcessed)
+    } catch(error){
+      try {
+        const errorProcessed = await error
+      } catch (err){
+        return Promise.reject(err)
+      }
+      return Promise.reject(error)
     }
 
-    let newAppParams = cloneDeep(__GLOBAL__REFRESH_TOKEN_OBJECT) || cloneDeep(applicationParams)
-    this.logger(`APPLICATION PARAMS IN PROXY = ${JSON.stringify(newAppParams)}`)
-    if (__GLOBAL__IS_REFRESHING_TOKEN === true){
-        this.logger(`in __GLOBAL__IS_REFRESHING_TOKEN => ${__GLOBAL__IS_REFRESHING_TOKEN}`)
-        eventEmitter.on('REFRESH_TOKEN', eventCallback)
-    } else {
-        this.logger(`not in __GLOBAL__IS_REFRESHING_TOKEN => ${__GLOBAL__IS_REFRESHING_TOKEN}`)
-        this.logger('CALLING _proxyApi')
-        return this._proxyApi(newAppParams, apiCallback, apiMethod, eventCallback)
-    }
   }
 }
 

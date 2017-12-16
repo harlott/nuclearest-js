@@ -9,7 +9,7 @@ describe('Storage', function() {
   let customStoragesMap = buildCustomStoragesMap('fileSystem', newStorage)
 
   describe('#buildCustomStorage()', function() {
-    it('should build the custom storage', function() {
+    it('expect build the custom storage', function() {
         expect(newStorage).to.have.property('fileSystem')
         expect(newStorage.fileSystem).to.have.property('setItem')
         expect(newStorage.fileSystem.setItem).to.be.a('function')
@@ -21,7 +21,7 @@ describe('Storage', function() {
   });
 
   describe('#buildCustomStoragesMap()', function() {
-    it('should build the custom storage map', function() {
+    it('expect build the custom storage map', function() {
         expect(customStoragesMap).to.have.property('fileSystem')
         expect(customStoragesMap).to.have.property('cookie')
         expect(customStoragesMap.fileSystem.setItem).to.be.a('function')
@@ -30,17 +30,17 @@ describe('Storage', function() {
 
   describe('#StorageInstance', function(){
     let storage = new Storage('fileSystem', undefined, customStoragesMap)
-    it('should not check custom storage', function(){
+    it('expect not check custom storage', function(){
       let _testStorage = buildCustomStorage('disabledStorage', (p, v)=>{throw new Error('can not set')}, (p)=>{throw new Error('can not get')}, (p)=>{throw new Error('can not remove')})
       let _testCustomStoragesMap = buildCustomStoragesMap('disabledStorage', newStorage)
       expect(canUseStorage('disabledStorage', undefined, _testCustomStoragesMap)).to.be.equal(false)
     })
 
-    it('should check custom storage', function(){
+    it('expect check custom storage', function(){
       expect(canUseStorage('fileSystem', undefined, customStoragesMap)).to.be.equal(true)
     })
 
-    it('should not check standard local storage disabled', function(){
+    it('expect not check standard local storage disabled', function(){
       let _mockedLocalStorage = {
         setItem: () => {throw new Error('disabled')},
         getItem: () => {throw new Error('disabled')},
@@ -49,7 +49,7 @@ describe('Storage', function() {
       expect(canUseStorage('fileSystem', _mockedLocalStorage)).to.be.equal(false)
     })
 
-    it('should not use fallback with standard local storage disabled,no fallbackStorage options and no callbackOnDisabled', function(){
+    it('expect not use fallback with standard local storage disabled,no fallbackStorage options and no callbackOnDisabled', function(){
       let _mockedLocalStorage = {
         setItem: () => {throw new Error('disabled')},
         getItem: () => {throw new Error('disabled')},
@@ -63,7 +63,7 @@ describe('Storage', function() {
       }
     })
 
-    it('should use callbackOnDisabled configured on standard local storage disabled', function(){
+    it('expect use callbackOnDisabled configured on standard local storage disabled', function(){
       let _mockedLocalStorage = {
         setItem: () => {throw new Error('disabled')},
         getItem: () => {throw new Error('disabled')},
@@ -78,7 +78,7 @@ describe('Storage', function() {
       }
     })
 
-    it('should use fallback with standard local storage disabled and fallbackStorage option grantedProps', function(){
+    it('expect use fallback with standard local storage disabled and fallbackStorage option grantedProps', function(){
       let _mockedLocalStorage = {
         setItem: () => {throw new Error('disabled')},
         getItem: () => {throw new Error('disabled')},
@@ -89,22 +89,22 @@ describe('Storage', function() {
       expect(_storageDisabled.getItem('a')).to.be.a('number')
     })
 
-    it('should get the types map', function(){
+    it('expect get the types map', function(){
       expect(Storage.getTypesMap()).to.have.all.keys('STORAGE', 'COOKIE')
     })
 
-    it('should add custom storage to Storage instance', function(){
+    it('expect add custom storage to Storage instance', function(){
       expect(storage.STORAGES_MAP).to.have.property('fileSystem')
     })
 
-    it('should set and get a value', function(){
+    it('expect set and get a value', function(){
       storage.setItem('a', 1)
       expect(storage.getItem('a')).to.be.a('number')
       storage.setItem('b', 'may be the good one')
       expect(storage.getItem('b')).to.be.equal('may be the good one')
     })
 
-    it('should set and get a value for localStorage', function(){
+    it('expect set and get a value for localStorage', function(){
       let _mockedLocalStorage = {
         setItem: (p, v) => {__global__[p] = v},
         getItem: (p) => {return __global__[p]},
@@ -115,18 +115,18 @@ describe('Storage', function() {
       expect(storage.getItem('a')).to.be.a('number')
     })
 
-    it('should remove a value', function(){
+    it('expect remove a value', function(){
       storage.setItem('a', 1)
       expect(storage.getItem('a')).to.be.a('number')
       storage.removeItem('b')
       expect(storage.getItem('b')).to.be.equal(undefined)
     })
 
-    it('should get the type', function(){
+    it('expect get the type', function(){
       expect(storage.getType()).to.be.equal('fileSystem')
     })
 
-    it('should get the method', function(){
+    it('expect get the method', function(){
       expect(storage.getMethod()).to.deep.be.equal(customStoragesMap.fileSystem)
     })
   })
