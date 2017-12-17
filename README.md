@@ -1,6 +1,4 @@
 NucleaRest JS v0.6.0-alpha [![Build Status](https://travis-ci.org/harlott/nuclearest-js.svg?branch=master)](https://travis-ci.org/harlott/nuclearest-js)  [![Coverage Status](https://coveralls.io/repos/github/harlott/nuclearest-js/badge.svg?branch=master)](https://coveralls.io/github/harlott/nuclearest-js?branch=master)
-
-
 ===================
 
 
@@ -12,10 +10,12 @@ A modern Javascript Rest API toolbox!
 
 NucleaRest will be a set of Javascript Rest utilities and practices for SPA applications.
 
-#### fetch
+#### fetch (enhanced)
 
 
- This is a simple proxy method for standard fetch that use [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch)
+ This is a simple proxy method for standard fetch. It will support a responseParser, to centralize and better control the basic shape of an API response object (especially for the errors handling).
+
+ In browser context, it uses [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch)
  for all human browsers and [fetch-ponyfill](https://github.com/qubyte/fetch-ponyfill) for other cases.
 
 
@@ -250,3 +250,17 @@ Example
 - fetch response object: no diff with original fetch, only potetial 2 flags more: isJson and isText to better handle response
 - fetch response status handling: delegate to a responseParser, for better customizations   
 - Runtime Mocking System
+
+
+#### Credits
+
+- [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch)
+- [fetch-ponyfill](https://github.com/qubyte/fetch-ponyfill)
+
+#### Refresh our knowledge
+
+Exploring promises and ES7 async/await
+
+- [Promises (Mozilla)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises)
+- [Using promises to await triggered events](https://stackoverflow.com/questions/43084557/using-promises-to-await-triggered-events)
+- [How to return values from an event handler in a promise?](https://stackoverflow.com/questions/43084557/using-promises-to-await-triggered-events)
