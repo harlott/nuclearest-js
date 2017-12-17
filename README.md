@@ -1,6 +1,8 @@
 NucleaRest JS v0.6.0-alpha [![Build Status](https://travis-ci.org/harlott/nuclearest-js.svg?branch=master)](https://travis-ci.org/harlott/nuclearest-js)  [![Coverage Status](https://coveralls.io/repos/github/harlott/nuclearest-js/badge.svg?branch=master)](https://coveralls.io/github/harlott/nuclearest-js?branch=master)
 ===================
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/harlott/nuclearest-js.svg)](https://greenkeeper.io/)
+
 
 A modern Javascript Rest API toolbox!
 ----------
