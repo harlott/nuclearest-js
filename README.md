@@ -24,10 +24,7 @@ NucleaRest will be a set of Javascript Rest utilities and practices for SPA appl
  **Features:**
 - fix Edge issues with HTTP methods response headers;
 - timeout handling;
-- all the responses with no content;
-- broken server response: if the server return HTTP 503 with HTML body may be you need to handle the response without blocking the promises chain. This method force 'fetch'
-   to return always a JSON response.
-
+- response parser
 
 **Warnings**
 Like isomorphic-fetch, this method is added as a global, even when using fetch-ponyfill to fix edge issues.
