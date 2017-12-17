@@ -1,5 +1,6 @@
 import isFunction from 'lodash/isFunction'
 import get from 'lodash/get'
+import deafultResponseParser from './defaultResponseParser'
 
 import { serverErrorResponse, isServerError } from '../services/Utils'
 
@@ -38,8 +39,14 @@ let _fetch = fetch
  *
  */
 
+const DEFAULT_TIMEOUT = 30000
 
-const fetch = (url, options) => {
+export const tm = (ms, reject) => {
+   return setTimeout(() => {reject({code: 'TIMEOUT'})}, ms)
+}
+
+const fetch = async (url, options) => {
+  let _fetchResult
   if (navigator !== undefined){
     const userAgent = get(navigator, 'userAgent')
     const isEdge =  /Edge\//.test(userAgent)
@@ -48,59 +55,29 @@ const fetch = (url, options) => {
     const fetchPonyfill = require('fetch-ponyfill')
 
     _fetch = isEdge === true && fetchPonyfill().fetch
-
   }
 
-  let resPromise = () => (new Promise((resolve) => {
-    let abort = false;
+  let resPromise = Promise
 
-    const tm = setTimeout(function () {
-      abort = true;
-      resolve(serverErrorResponse);
-    }, options.timeout || 30000);
+  const wait = ms => new Promise(resolve, reject => tm(ms, reject));
 
-    return _fetch(url, options)
-      .then((response) => {
-        clearTimeout(tm);
-        return !isServerError(response) ? response : serverErrorResponse;
-      })
-      .then((response) => {
-        if (!abort) {
-          if (isFunction(response.text)){
-            return response.text().then((text) => {
-              let jsonBody
-              let isJsonResponse = true
-              try{
-                jsonBody = JSON.parse(text)
-              } catch(e){
+  try {
+    const timeoutProcessing = wait(options.timeout || DEFAULT_TIMEOUT)
+    _fetchResponse = await _fetch(url, options)
+    clearTimeout(tm);
 
-              }
-              if (!jsonBody){
-                isJsonResponse = false
-                jsonBody = {transformedValue: text}
-              }
-              return resolve({
-                    json: jsonBody,
-                    text: text,
-                    isJson: isJsonResponse,
-                    ok: response.ok,
-                    status: response.status,
-                    originalResponse: response,
-                })
-            }, (err) => {
-              if (err){
-                  throw new Error("Error on converting from response into jSON:  ", err.stack)
-              }
-              return resolve(serverErrorResponse)
-            });
-          } else {
-            return resolve(serverErrorResponse )
-          }
-        }
-      })
-  }));
+    if (options.parseResponse === false){
+      return resolve(_fetchResponse)
+    }
 
-    return resPromise()
+    if (isFunction(options.responseParser)){
+      return options.responseParser(_fetchResponse)
+    } else {
+      return defaultResponseParser(_fetchResponse)
+    }
+  } catch(err){
+      return resPromise.reject(err)
+  }
 }
 
 export default fetch
