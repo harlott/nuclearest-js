@@ -1,7 +1,7 @@
 import isFunction from 'lodash/isFunction'
 import get from 'lodash/get'
 import deafultResponseParser from './defaultResponseParser'
-
+import configForBrowserContext from './configForBrowserContext'
 import { serverErrorResponse, isServerError } from '../services/Utils'
 
 const Promise = require('es6-promise').Promise;
@@ -47,15 +47,7 @@ export const tm = (ms, reject) => {
 
 const fetch = async (url, options) => {
   let _fetchResult
-  if (navigator !== undefined){
-    const userAgent = get(navigator, 'userAgent')
-    const isEdge =  /Edge\//.test(userAgent)
-    if (isEdge) window.fetch = undefined
-
-    const fetchPonyfill = require('fetch-ponyfill')
-
-    _fetch = isEdge === true && fetchPonyfill().fetch
-  }
+  _fetch = configForBrowserContext()
 
   let resPromise = Promise
 
