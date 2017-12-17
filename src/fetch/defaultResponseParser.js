@@ -1,3 +1,5 @@
+import isFunction from 'lodash/isFunction'
+
 const defaultResponseParser = (response) => {
   if (!abort) {
     if (isFunction(response.text)){
@@ -13,7 +15,7 @@ const defaultResponseParser = (response) => {
           isJsonResponse = false
           jsonBody = {transformedValue: text}
         }
-        return resolve({
+        return Promise.resolve({
               json: jsonBody,
               text: text,
               isJson: isJsonResponse,
@@ -23,12 +25,12 @@ const defaultResponseParser = (response) => {
           })
       }, (err) => {
         if (err){
-            throw new Error("Error on converting from response into jSON:  ", err.stack)
+            Promise.reject(new Error(`Error on converting from response into jSON: ${err.stack}`))
         }
-        return resolve(serverErrorResponse)
+        return Promise.reject(serverErrorResponse)
       });
     } else {
-      return resolve(serverErrorResponse )
+      return Promise.reject(serverErrorResponse )
     }
   }
 }
