@@ -1,4 +1,4 @@
-const routes = (app) => {
+module.exports = (app) => {
 
   // todoList Routes
   app.route('/get-with-timeout')
@@ -9,4 +9,3 @@ const routes = (app) => {
     })
 };
 
-export default routes
