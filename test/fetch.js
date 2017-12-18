@@ -1,26 +1,30 @@
 import fetch from '../src/fetch'
+import Headers from '../src/Headers'
 
-import chai, {expect, assert} from 'chai'
-import chaiAsPromised from 'chai-as-promised'
-import cloneDeep from 'lodash/cloneDeep'
+const chai = require('chai')
+const expect = chai.expect
 
-chai.use(chaiAsPromised)
+var mochaAsync = (fn) => {
+  return async (done) => {
+    try {
+      await fn();
+      done();
+    } catch (err) {
+      done(err);
+    }
+  };
+};
 
 describe('fetch', () => {
-    it('expect to handle timeout by default timing', async () => {
+    it('expect to handle timeout by default timing with parse response false', mochaAsync(async (done) => {
       let fetchOptions = {
         method: 'GET'
       }
-      try {
-          const resProcessed = await fetch('http://localhost:3000/get-with-timeout')
-          console.log(`resProcessed = ${JSON.stringify(resProcessed)}`)
-          expect(resProcessed).to.have.property('code').to.be.equal('suca')
-      } catch(err){
-          console.log(`err = ${JSON.stringify(err)}`)
-      }
-
-
-
+        let headers = new Headers().add().acceptApplicationJson().use()
+        const res = await fetch('http://localhost:3000/get-with-timeout', {parseResponse: false, headers: headers})
+        const jsonRes = await res.json()
+        console.log(`resProcessed = ${JSON.stringify(jsonRes)}`)
+        expect(res).to.have.property('status')
     })
-
+    )
 })

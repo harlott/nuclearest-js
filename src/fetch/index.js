@@ -1,13 +1,13 @@
 import isFunction from 'lodash/isFunction'
 import get from 'lodash/get'
-import deafultResponseParser from './defaultResponseParser'
+import defaultResponseParser from './defaultResponseParser'
 import configForBrowserContext from './configForBrowserContext'
 import { serverErrorResponse, isServerError } from '../services/Utils'
 
 const Promise = require('es6-promise').Promise;
 
-import 'isomorphic-fetch';
-let _fetch = fetch
+import isoFetch from 'isomorphic-fetch';
+let _fetch = isoFetch
 
 
 
@@ -46,29 +46,44 @@ export const tm = (ms, reject) => {
 }
 
 const fetch = async (url, options) => {
-  let _fetchResult
-  _fetch = configForBrowserContext()
+
+  //_fetch = configForBrowserContext()
 
   let resPromise = Promise
 
-  const wait = ms => new Promise(resolve, reject => tm(ms, reject));
-
+  //const wait = ms => new Promise(reject => tm(ms, reject));
   try {
-    const timeoutProcessing = wait(options.timeout || DEFAULT_TIMEOUT)
-    _fetchResponse = await _fetch(url, options)
-    clearTimeout(tm);
+    //const timeoutProcessing = wait(options.timeout || DEFAULT_TIMEOUT)
+    //return Promise.resolve(timeoutProcessing)
+    return new Promise((resolve, reject) => {
+        _fetch(url, options).then((response) => {
+          resolve(response)
+        }).catch((err)=>{
+          reject(fetchErr)
+        })
+    })
 
-    if (options.parseResponse === false){
-      return resolve(_fetchResponse)
+    //clearTimeout(tm);
+
+
+    /*if (options.parseResponse === false){
+      return new Promise((resolve) => {resolve(_fetchResponse)})
     }
 
     if (isFunction(options.responseParser)){
       return options.responseParser(_fetchResponse)
     } else {
       return defaultResponseParser(_fetchResponse)
-    }
+    }*/
   } catch(err){
-      return resPromise.reject(err)
+    return new Promise((resolve, reject) => reject(response))
+      try {
+        const errResponse = await err
+        console.log(errResponse)
+        return Promise.reject(errResponse)
+      } catch(errRes){
+        return Promise.reject(errRes)
+      }
   }
 }
 
