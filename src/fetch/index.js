@@ -52,16 +52,18 @@ const fetch = async (url, options) => {
   let resPromise = Promise
 
   //const wait = ms => new Promise(reject => tm(ms, reject));
+  return _fetch(url, options)
+  /*return new Promise((resolve, reject) => {
+    _fetch(url, options).then((response) => {
+      resolve(response)
+    }).catch((err)=>{
+      reject(fetchErr)
+    })
+  })*/
+
   try {
     //const timeoutProcessing = wait(options.timeout || DEFAULT_TIMEOUT)
     //return Promise.resolve(timeoutProcessing)
-    return new Promise((resolve, reject) => {
-        _fetch(url, options).then((response) => {
-          resolve(response)
-        }).catch((err)=>{
-          reject(fetchErr)
-        })
-    })
 
     //clearTimeout(tm);
 
