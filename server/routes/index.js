@@ -3,10 +3,9 @@ module.exports = (app) => {
   // todoList Routes
   app.route('/get-with-timeout')
     .get((req, res) => {
-      res.send({code: 'SUCA'})
+      res.send({ok: true, status: 200})
       /*setTimeout(()=>{
           res.send({code: 'SUCA'})
         }, 40000)*/
     })
 };
-
