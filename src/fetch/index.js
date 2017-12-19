@@ -62,9 +62,7 @@ const fetch = async (url, options) => {
   try {
     const _fetchResponse = await _fetch(url, options)
     _fetchResponse.isJson=true
-    _fetch(url, options).then(response => {
-      console.log(`_fetchResponse = ${JSON.stringify(response)}`)
-    })
+    return _fetchResponse
 
     //const timeoutProcessing = wait(options.timeout || DEFAULT_TIMEOUT)
     //return Promise.resolve(timeoutProcessing)
