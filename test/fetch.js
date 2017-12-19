@@ -27,6 +27,7 @@ describe('fetch', () => {
         } catch(e){
 
         }
+
         if (isFunction(errRes.then)){
           Promise.reject(errRes)
         }

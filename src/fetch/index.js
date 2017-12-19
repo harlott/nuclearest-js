@@ -50,10 +50,8 @@ const fetch = async (url, options) => {
   //_fetch = configForBrowserContext()
 
   let resPromise = Promise
-
   //const wait = ms => new Promise(reject => tm(ms, reject));
-  return _fetch(url, options)
-  /*return new Promise((resolve, reject) => {
+    /*return new Promise((resolve, reject) => {
     _fetch(url, options).then((response) => {
       resolve(response)
     }).catch((err)=>{
@@ -62,16 +60,25 @@ const fetch = async (url, options) => {
   })*/
 
   try {
+    const _fetchResponse = await _fetch(url, options)
+    _fetchResponse.isJson=true
+    _fetch(url, options).then(response => {
+      console.log(`_fetchResponse = ${JSON.stringify(response)}`)
+    })
+
     //const timeoutProcessing = wait(options.timeout || DEFAULT_TIMEOUT)
     //return Promise.resolve(timeoutProcessing)
 
     //clearTimeout(tm);
 
 
-    /*if (options.parseResponse === false){
-      return new Promise((resolve) => {resolve(_fetchResponse)})
-    }
 
+
+
+    if (options.parseResponse === false){
+      return Promise.resolve({_fetchResponse})
+    }
+    /*
     if (isFunction(options.responseParser)){
       return options.responseParser(_fetchResponse)
     } else {
