@@ -47,34 +47,29 @@ export const tm = (ms, reject) => {
 
 const fetch = async (url, options) => {
 
-  //_fetch = configForBrowserContext()
-
   let resPromise = Promise
-  //const wait = ms => new Promise(reject => tm(ms, reject));
-    /*return new Promise((resolve, reject) => {
-    _fetch(url, options).then((response) => {
-      resolve(response)
-    }).catch((err)=>{
-      reject(fetchErr)
-    })
-  })*/
-
+  const wait = ms => new Promise(reject => tm(ms, reject));
   try {
-    const _fetchResponse = await _fetch(url, options)
-    _fetchResponse.isJson=true
-    return _fetchResponse
+    _fetch = configForBrowserContext(_fetch)
+    try {
+      const timeoutProcessing = wait(options.timeout || DEFAULT_TIMEOUT)
+    } catch (errTimeout){
+      return Promise.reject(errTimeout)
+    }
 
-    //const timeoutProcessing = wait(options.timeout || DEFAULT_TIMEOUT)
+    const _fetchResponse = await _fetch(url, options)
+    clearTimeout(tm);
+    _fetchResponse.isJson=true
     //return Promise.resolve(timeoutProcessing)
 
-    //clearTimeout(tm);
+
 
 
 
 
 
     if (options.parseResponse === false){
-      return Promise.resolve({_fetchResponse})
+      return _fetchResponse
     }
     /*
     if (isFunction(options.responseParser)){
