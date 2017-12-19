@@ -1,13 +1,16 @@
 import fetch from '../src/fetch'
 import Headers from '../src/Headers'
+import isFunction from 'lodash/isFunction'
 
-const chai = require('chai')
-const assert = chai.assert
-const expect = chai.expect
+import chai, { expect, should, assert } from 'chai';
+should();
+import chaiAsPromised from "chai-as-promised";
+import 'babel-polyfill';
+chai.use(chaiAsPromised);
 
 describe('fetch', () => {
-    it('expect to handle timeout by default timing with parse response false', async (done) => {
-      done()
+    it('expect to receive successfull response', async () => {
+
       let fetchOptions = {
         method: 'GET'
       }
@@ -16,11 +19,19 @@ describe('fetch', () => {
         const res = await fetch('http://localhost:3000/get-with-timeout', {parseResponse: false, headers: headers})
         const resJson = await res.json()
         console.log(`res = ${JSON.stringify(resJson)}`)
-        //expect(res.ok).to.be.equal(true)
-        //assert.ok(res.ok)
+        expect(resJson).to.deep.equal({ok: true, status: 200});
       } catch(errRes){
+        try {
+            const errResProcessed = await errRes
+            console.log(errResProcessed)
+        } catch(e){
+
+        }
+        if (isFunction(errRes.then)){
+          Promise.reject(errRes)
+        }
+        throw new Error(errRes)
         console.log(`errRes = ${errRes}`)
-        //assert.ok(false)
       }
     })
 
