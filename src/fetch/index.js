@@ -46,30 +46,12 @@ export const tm = (ms, reject) => {
 }
 
 const fetch = async (url, options) => {
-
-  let resPromise = Promise
-  const wait = ms => new Promise(reject => tm(ms, reject));
   try {
     _fetch = configForBrowserContext(_fetch)
-    try {
-      const timeoutProcessing = wait(options.timeout || DEFAULT_TIMEOUT)
-    } catch (errTimeout){
-      return Promise.reject(errTimeout)
-    }
-
     const _fetchResponse = await _fetch(url, options)
-    clearTimeout(tm);
     _fetchResponse.isJson=true
-    //return Promise.resolve(timeoutProcessing)
-
-
-
-
-
-
-
     if (options.parseResponse === false){
-      return _fetchResponse
+      return Promise.resolve(_fetchResponse)
     }
     /*
     if (isFunction(options.responseParser)){
@@ -78,7 +60,7 @@ const fetch = async (url, options) => {
       return defaultResponseParser(_fetchResponse)
     }*/
   } catch(err){
-    return new Promise((resolve, reject) => reject(response))
+    return new Promise((resolve, reject) => reject(err))
       try {
         const errResponse = await err
         console.log(errResponse)
@@ -87,6 +69,10 @@ const fetch = async (url, options) => {
         return Promise.reject(errRes)
       }
   }
+
+  const wait = ms => new Promise(reject => tm(ms, reject));
+  return wait(options.timeout || DEFAULT_TIMEOUT)
+
 }
 
 export default fetch
