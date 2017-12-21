@@ -17,17 +17,12 @@ describe('fetch', () => {
       let headers = new Headers().add().acceptApplicationJson().use()
       try{
         const res = await fetch('http://localhost:3000/get-success', {parseResponse: false, headers: headers})
-        console.log(`res = ${JSON.stringify(res)}`)
         const resJson = await res.json()
         const resHeaders = res.headers
-        console.log(`resHeaders = ${JSON.stringify(resHeaders)}`)
-        console.log(`res.isJson = ${res.isJson}`)
-        console.log(`res = ${JSON.stringify(resJson)}`)
         expect(resJson).to.deep.equal({ok: true, status: 200});
       } catch(errRes){
         try {
             const errResProcessed = await errRes
-            console.log(errResProcessed)
         } catch(e){
 
         }
@@ -36,7 +31,6 @@ describe('fetch', () => {
           Promise.reject(errRes)
         }
         throw new Error(errRes)
-        console.log(`errRes = ${errRes}`)
       }
     })
 
@@ -48,39 +42,30 @@ describe('fetch', () => {
     let headers = new Headers().add().acceptApplicationJson().use()
     try{
       const res = await fetch('http://localhost:3000/get-error', {parseResponse: false, headers: headers})
-      console.log(`res = ${JSON.stringify(res)}`)
       const resJson = await res.json()
       const resHeaders = res.headers
-      console.log(`resHeaders = ${JSON.stringify(resHeaders)}`)
-      console.log(`res.isJson = ${res.isJson}`)
-      console.log(`res = ${JSON.stringify(resJson)}`)
       expect(resJson).to.deep.equal({ok: false, status: 415});
     } catch(errRes){
-      console.log(`errRes = ${errRes}`)
       expect(errRes.name).to.be.equal('FetchError');
     }
   })
 
-  it('expect to handle timeout', async () => {
-
+  it('expect to handle timeout', async function(){
+    this.timeout(40000)
     let fetchOptions = {
       method: 'GET'
     }
     let headers = new Headers().add().acceptApplicationJson().use()
     try{
-      assert.ok(true)
       const res = await fetch('http://localhost:3000/get-with-timeout', {parseResponse: false, headers: headers})
-      console.log(`res = ${JSON.stringify(res)}`)
-      const resJson = await res.json()
-      const resHeaders = res.headers
-      console.log(`resHeaders = ${JSON.stringify(resHeaders)}`)
-      console.log(`res.isJson = ${res.isJson}`)
-      console.log(`resJson = ${JSON.stringify(resJson)}`)
-      expect(resJson).to.deep.equal({code: 'TIMEOUT'});
+      assert.ok(false)
     } catch(errRes){
-      console.log(`errRes = ${errRes}`)
-      expect(errRes.name).to.be.equal('FetchError');
+      if (errRes.name !== undefined){
+          expect(errRes.name).to.be.equal('FetchError');
+      }
+      if (errRes.code !== undefined){
+        expect(errRes.code).to.be.equal('GENERIC_TIMEOUT');
+      }
     }
   })
-
 })

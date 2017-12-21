@@ -15,7 +15,6 @@ const configForBrowserContext = (fetchParam) => {
   } catch(error){
     throw new Error(error)
   }
-
 }
 
 

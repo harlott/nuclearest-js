@@ -1,5 +1,6 @@
 import isFunction from 'lodash/isFunction'
 import get from 'lodash/get'
+import timeoutWrapper from './timeoutWrapper'
 import defaultResponseParser from './defaultResponseParser'
 import configForBrowserContext from './configForBrowserContext'
 import { serverErrorResponse, isServerError } from '../services/Utils'
@@ -39,26 +40,22 @@ let _fetch = isoFetch
  *
  */
 
-const DEFAULT_TIMEOUT = 30000
-
-export const tm = (ms, reject) => {
-   return setTimeout(() => {reject({code: 'TIMEOUT'})}, ms)
-}
+const DEFAULT_TIMEOUT = 10000
 
 const fetch = async (url, options) => {
   try {
     _fetch = configForBrowserContext(_fetch)
-    const _fetchResponse = await _fetch(url, options)
+    const _fetchResponse = await timeoutWrapper(_fetch, url, options, options.timeout || DEFAULT_TIMEOUT)
     _fetchResponse.isJson=true
     if (options.parseResponse === false){
       return Promise.resolve(_fetchResponse)
     }
-    /*
+
     if (isFunction(options.responseParser)){
       return options.responseParser(_fetchResponse)
     } else {
       return defaultResponseParser(_fetchResponse)
-    }*/
+    }
   } catch(err){
     return new Promise((resolve, reject) => reject(err))
       try {

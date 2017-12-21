@@ -12,6 +12,6 @@ module.exports = (app) => {
     .get((req, res) => {
       setTimeout(()=>{
        res.send({code: 'TIMEOUT'})
-       }, 40000)
+     }, 32000)
     })
 };
