@@ -50,7 +50,6 @@ const fetch = async (url, options) => {
     if (options.parseResponse === false){
       return Promise.resolve(_fetchResponse)
     }
-
     if (isFunction(options.responseParser)){
       return options.responseParser(_fetchResponse)
     } else {
@@ -60,16 +59,11 @@ const fetch = async (url, options) => {
     return new Promise((resolve, reject) => reject(err))
       try {
         const errResponse = await err
-        console.log(errResponse)
         return Promise.reject(errResponse)
       } catch(errRes){
         return Promise.reject(errRes)
       }
   }
-
-  const wait = ms => new Promise(reject => tm(ms, reject));
-  return wait(options.timeout || DEFAULT_TIMEOUT)
-
 }
 
 export default fetch
