@@ -8,6 +8,7 @@ module.exports = (app) => {
     .get((req, res) => {
       res.status(415).json({code: 'UNSUPPORTED_MEDIA_TYPE'}).send();
   })
+    
   app.route('/get-with-timeout')
     .get((req, res) => {
       setTimeout(()=>{

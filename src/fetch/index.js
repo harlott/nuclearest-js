@@ -3,7 +3,6 @@ import get from 'lodash/get'
 import timeoutWrapper from './timeoutWrapper'
 import defaultResponseParser from './defaultResponseParser'
 import configForBrowserContext from './configForBrowserContext'
-import { serverErrorResponse, isServerError } from '../services/Utils'
 
 const Promise = require('es6-promise').Promise;
 
@@ -46,7 +45,6 @@ const fetch = async (url, options) => {
   try {
     _fetch = configForBrowserContext(_fetch)
     const _fetchResponse = await timeoutWrapper(_fetch, url, options, options.timeout || DEFAULT_TIMEOUT)
-    _fetchResponse.isJson=true
     if (options.parseResponse === false){
       return Promise.resolve(_fetchResponse)
     }

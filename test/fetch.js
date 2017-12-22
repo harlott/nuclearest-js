@@ -38,7 +38,7 @@ describe('fetch', () => {
     }
   })
 
-  it('expect to parse response by defaultParser with json already resolved and isJson flag to true', async () => {
+  it('expect to parse response by defaultParser with isJson flag to true', async () => {
     let fetchOptions = {
       method: 'GET'
     }
@@ -46,10 +46,32 @@ describe('fetch', () => {
     try{
       const res = await fetch('http://localhost:3000/get-success', {parseResponse: true, headers: headers})
       const jsonRes = await res.json()
+      expect(res.isJson).to.be.equal(true)
       expect(jsonRes).to.be.deep.equal({a: 1})
     } catch(errRes){
       if (errRes.name !== undefined){
           throw new Error(errRes)
+          expect(errRes.name).to.be.equal('FetchError');
+      }
+      if (errRes.code !== undefined){
+        expect(errRes.code).to.be.equal('GENERIC_TIMEOUT');
+      }
+    }
+  })
+
+  it('expect to parse response by defaultParser with server error response', async () => {
+    let fetchOptions = {
+      method: 'GET'
+    }
+    let headers = new Headers().add().acceptApplicationJson().use()
+    try{
+      const res = await fetch('http://localhost:3000/get-server-error', {parseResponse: true, headers: headers})
+      const jsonRes = await res.json()
+      expect(res.isJson).to.be.equal(true)
+      expect(jsonRes).to.be.deep.equal({a: 1})
+    } catch(errRes){
+      if (errRes.name !== undefined){
+          //throw new Error(errRes)
           expect(errRes.name).to.be.equal('FetchError');
       }
       if (errRes.code !== undefined){
