@@ -2,11 +2,11 @@ module.exports = (app) => {
 
   app.route('/get-success')
     .get((req, res) => {
-      res.send({ok: true, status: 200, json: () => {return Promise.resolve({a: '1'})}})
+      res.status(200).json({a: 1}).send();
     })
   app.route('/get-error')
     .get((req, res) => {
-      res.send({ok: false, status: 415, json: () => {return Promise.resolve({code: 'UNSUPPORTED_MEDIA_TYPE'})}})
+      res.status(415).json({code: 'UNSUPPORTED_MEDIA_TYPE'}).send();
   })
   app.route('/get-with-timeout')
     .get((req, res) => {

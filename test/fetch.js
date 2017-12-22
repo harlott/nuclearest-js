@@ -10,7 +10,6 @@ chai.use(chaiAsPromised);
 
 describe('fetch', () => {
     it('expect to receive successfull response', async () => {
-
       let fetchOptions = {
         method: 'GET'
       }
@@ -18,18 +17,8 @@ describe('fetch', () => {
       try{
         const res = await fetch('http://localhost:3000/get-success', {parseResponse: false, headers: headers})
         const resJson = await res.json()
-        const resHeaders = res.headers
-        expect(resJson).to.deep.equal({ok: true, status: 200});
+        expect(resJson).to.deep.equal({a: 1});
       } catch(errRes){
-        try {
-            const errResProcessed = await errRes
-        } catch(e){
-
-        }
-
-        if (isFunction(errRes.then)){
-          Promise.reject(errRes)
-        }
         throw new Error(errRes)
       }
     })
@@ -43,21 +32,40 @@ describe('fetch', () => {
     try{
       const res = await fetch('http://localhost:3000/get-error', {parseResponse: false, headers: headers})
       const resJson = await res.json()
-      const resHeaders = res.headers
-      expect(resJson).to.deep.equal({ok: false, status: 415});
+      expect(resJson).to.deep.equal({code: 'UNSUPPORTED_MEDIA_TYPE'});
     } catch(errRes){
       expect(errRes.name).to.be.equal('FetchError');
     }
   })
 
-  it('expect to handle timeout', async function(){
-    this.timeout(40000)
+  it('expect to parse response by defaultParser with json already resolved and isJson flag to true', async () => {
     let fetchOptions = {
       method: 'GET'
     }
     let headers = new Headers().add().acceptApplicationJson().use()
     try{
-      const res = await fetch('http://localhost:3000/get-with-timeout', {parseResponse: false, headers: headers})
+      const res = await fetch('http://localhost:3000/get-success', {parseResponse: true, headers: headers})
+      const jsonRes = await res.json()
+      expect(jsonRes).to.be.deep.equal({a: 1})
+    } catch(errRes){
+      if (errRes.name !== undefined){
+          throw new Error(errRes)
+          expect(errRes.name).to.be.equal('FetchError');
+      }
+      if (errRes.code !== undefined){
+        expect(errRes.code).to.be.equal('GENERIC_TIMEOUT');
+      }
+    }
+  })
+
+  it('expect to handle timeout', async function(){
+    this.timeout(2500)
+    let fetchOptions = {
+      method: 'GET'
+    }
+    let headers = new Headers().add().acceptApplicationJson().use()
+    try{
+      const res = await fetch('http://localhost:3000/get-with-timeout', {parseResponse: false, headers: headers, timeout: 2000})
       assert.ok(false)
     } catch(errRes){
       if (errRes.name !== undefined){
