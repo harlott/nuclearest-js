@@ -48,13 +48,13 @@ const fetch = async (url, options) => {
     if (options.parseResponse === false){
       return Promise.resolve(_fetchResponse)
     }
+    
     if (isFunction(options.responseParser)){
       return options.responseParser(_fetchResponse)
     } else {
       return defaultResponseParser(_fetchResponse)
     }
   } catch(err){
-    return new Promise((resolve, reject) => reject(err))
       try {
         const errResponse = await err
         return Promise.reject(errResponse)
