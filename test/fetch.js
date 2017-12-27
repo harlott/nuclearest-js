@@ -71,11 +71,7 @@ describe('fetch', () => {
       expect(jsonRes).to.be.deep.equal({a: 1})
     } catch(errRes){
       if (errRes.name !== undefined){
-          //throw new Error(errRes)
           expect(errRes.name).to.be.equal('FetchError');
-      }
-      if (errRes.code !== undefined){
-        expect(errRes.code).to.be.equal('GENERIC_TIMEOUT');
       }
     }
   })
