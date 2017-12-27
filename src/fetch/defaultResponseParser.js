@@ -9,6 +9,9 @@ const defaultResponseParser = async (response) => {
   }
 
   let parsedResponse = cloneDeep(response)
+  parsedResponse.isEmpty = false
+  parsedResponse.isText = false
+  parsedResponse.isJson = false
   let jsonBody
   try {
       let responseTextProcessed = await response.text()
