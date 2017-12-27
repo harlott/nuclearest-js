@@ -15,35 +15,18 @@ NucleaRest will be a set of Javascript Rest utilities and practices for SPA appl
 #### fetch (enhanced)
 
 
- This is a simple proxy method for standard fetch. It will support a responseParser, to centralize and better control the basic shape of an API response object (especially for the errors handling).
-
- In browser context, it uses [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch)
- for all human browsers and [fetch-ponyfill](https://github.com/qubyte/fetch-ponyfill) for other cases.
-
-
+ This is a HOF (High Order Function) to enhance standard fetch.
+  
  **Features:**
-- fix Edge issues with HTTP methods response headers;
-- timeout handling;
-- all the responses with no content;
-- broken server response: if the server return HTTP 503 with HTML body may be you need to handle the response without blocking the promises chain. This method force 'fetch'
-   to return always a JSON response.
+ - universal: use [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch) 
+ - fix Edge issues with HTTP methods response headers in browser context using [fetch-ponyfill](https://github.com/qubyte/fetch-ponyfill)
+ - timeout handling;
+ - parsing body response: use it or not(default), use default (isEmpty, isJson, isText flags) or use your own
+ - Future: XHR abort handling
 
-
+ 
 **Warnings**
 Like isomorphic-fetch, this method is added as a global, even when using fetch-ponyfill to fix edge issues.
-Currently the response object shape diff from isomorphic-fetch response.
-
-```
-{
-      json,
-      text,
-      isJson,
-      ok,
-      status,
-      originalResponse,
-  }
-
-```
 
 Example:
 
@@ -249,13 +232,12 @@ Example
 
 
 #### Next Releases
-- fetch response object: no diff with original fetch, only potetial 2 flags more: isJson and isText to better handle response
-- fetch response status handling: delegate to a responseParser, for better customizations   
+- fetch abort handling   
 - Runtime Mocking System
 
 
 #### Credits
-
+- [harlott](https://github.com/harlott)
 - [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch)
 - [fetch-ponyfill](https://github.com/qubyte/fetch-ponyfill)
 
