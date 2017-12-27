@@ -10,9 +10,9 @@
     "doc": "node .internal/build-doc github",
     "doc:site": "node .internal/build-doc site",
     "watch": "scripty",
-    "test": "cross-env NODE_ENV=test nyc mocha -R spec --compilers js:babel-register  --recursive && nyc report --reporter=text-lcov | coveralls",
+    "test": "node server && cross-env NODE_ENV=test nyc mocha -R spec --compilers js:babel-register  --recursive && nyc report --reporter=text-lcov | coveralls",
     "test:noCoverall": "cross-env NODE_ENV=test nyc mocha -R spec --compilers js:babel-register  --recursive",
-    "test:watch": "node server && npm test -- --watch ",
+    "test:watch": "npm test -- --watch ",
     "test:watchNoCoverall": "npm run test:noCoverall -- --watch"
   },
   "repository": {
