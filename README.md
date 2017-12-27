@@ -18,11 +18,11 @@ NucleaRest will be a set of Javascript Rest utilities and practices for SPA appl
  This is a HOF (High Order Function) to enhance standard fetch.
   
  **Features:**
- - 1) universal: use [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch) 
- - 2) fix Edge issues with HTTP methods response headers in browser context using [fetch-ponyfill](https://github.com/qubyte/fetch-ponyfill)
- - 3) timeout handling;
- - 4) parsing body response: use it or not(default), use default (isEmpty, isJson, isText flags) or use your own
- - 5) Future: XHR abort handling
+ - universal: use [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch) 
+ - fix Edge issues with HTTP methods response headers in browser context using [fetch-ponyfill](https://github.com/qubyte/fetch-ponyfill)
+ - timeout handling;
+ - parsing body response: use it or not(default), use default (isEmpty, isJson, isText flags) or use your own
+ - Future: XHR abort handling
 
  
 **Warnings**
