@@ -92,6 +92,22 @@ describe('fetch', () => {
     }
   })
 
+  it('expect to parse response by defaultParser with text response body', async () => {
+    let fetchOptions = {
+      method: 'GET'
+    }
+    let headers = new Headers().add().acceptApplicationJson().use()
+    try{
+      const res = await fetch('http://localhost:3000/get-text-content', {parseResponse: true, headers: headers})
+      expect(res.isText).to.be.equal(true)
+    } catch(errRes){
+      console.log(JSON.stringify(errRes))  
+      if (errRes.name !== undefined){
+          expect(errRes.name).to.be.equal('FetchError');
+      }
+    }
+  })
+
   it('expect to handle timeout', async function(){
     this.timeout(2500)
     let fetchOptions = {

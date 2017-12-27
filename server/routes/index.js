@@ -13,6 +13,11 @@ module.exports = (app) => {
     .get((req, res) => {
       res.status(201).send();
   })
+
+  app.route('/get-text-content')
+    .get((req, res) => {
+      res.status(200).send('TEXT BODY');
+  })
     
   app.route('/get-with-timeout')
     .get((req, res) => {
