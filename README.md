@@ -1,4 +1,4 @@
-NucleaRest JS v0.6.0-alpha
+NucleaRest JS v0.7.0-alpha
 ===================
 
 [![Build Status](https://travis-ci.org/harlott/nuclearest-js.svg?branch=master)](https://travis-ci.org/harlott/nuclearest-js)  [![Coverage Status](https://coveralls.io/repos/github/harlott/nuclearest-js/badge.svg?branch=master)](https://coveralls.io/github/harlott/nuclearest-js?branch=master) [![Greenkeeper badge](https://badges.greenkeeper.io/harlott/nuclearest-js.svg)](https://greenkeeper.io/)
@@ -84,14 +84,6 @@ You can also create and use your own.
 
 This is a simple centralized system to handle the request HTTP headers. Provide few basic methods for oauth authentication
 
-To handle headers parameters, you can apply CXA (clientData, xhrOptionsData, authData) pattern:
-
-a web application can provide 3 types of parameters:
-
-  - clientData: handle some configurations like 'applicationId', or some default values for some properties like '{lang: 'EN'}'
-  - xhrOptionsData: handle timeout value, cors options...
-  - authData: handle authentication data i.e.(oauth) 'tokenObject: {tokenType: "Bearer", accessToken: "1111-2222-3333-4444"}'
-
 
 Example:
 
@@ -100,7 +92,6 @@ Example:
 ```
  import fetch from 'nuclearest-js/fetch'
  import Headers, {headersMap} from 'nuclearest-js/Headers'
- import CLIENT_DATA from 'your/path/CLIENT_DATA'
 
  let headers = new Headers()
                    .add()
