@@ -13,23 +13,35 @@ let _fetch = isoFetch
 
 
 /**
- * This is a proxy method for standard fetch that use isomorphic-fetch
- * for all human browsers and fetch-ponyfill for other cases.
+ * This is a HOF (High Order Function) to enhance standard fetch.
+ * 
  * Features:
- * 1) fix Edge issues with HTTP methods response headers;
- * 2) timeout handling;
- * 3) all the responses with no content;
- * 4) broken server response: if the server return HTTP 503 may be you need to handle
- *    the response without blocking the promises chain. This method force 'fetch'
- *    to return always a JSON response.
+ * 1) universal: use isomorphic-fetch 
+ * 2) fix Edge issues with HTTP methods response headers in browser context using fetch-ponyfill;
+ * 3) timeout handling;
+ * 4) parsing body response: use it or not(default), use default (isEmpty, isJson, isText flags) or use your own
+ * 5) Future: XHR abort handling
  *
  * @param  {String} url     The request url
- * @param  {Object} options The standard fetch options object
+ * @param  {Object} options The standard fetch options object plus: boolean parseResponse (default: false), function responseParser
  * @return {Promise}        Returns a promise with original fetch response in 'originalResponse' property
  *
  * @example
  *
+ * //No Parsed Response:
+ * 
  * fetch('/users', {
+ *      method: 'POST',
+ *      timeout: 40000,
+ *      headers: {'Content-Type': 'application/json'},
+ *      body: JSON.stringify({name: 'Jack'})
+ *    }
+ * )
+ * 
+ * //Parsed Response with default response parser function:
+ * 
+ * fetch('/users', {
+ *      parseResponse: true,
  *      method: 'POST',
  *      timeout: 40000,
  *      headers: {'Content-Type': 'application/json'},
@@ -48,7 +60,7 @@ const fetch = async (url, options) => {
     if (options.parseResponse === false){
       return Promise.resolve(_fetchResponse)
     }
-    
+
     if (isFunction(options.responseParser)){
       return options.responseParser(_fetchResponse)
     } else {

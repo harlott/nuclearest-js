@@ -15,32 +15,18 @@ NucleaRest will be a set of Javascript Rest utilities and practices for SPA appl
 #### fetch (enhanced)
 
 
- This is a simple proxy method for standard fetch. It will support a responseParser, to centralize and better control the basic shape of an API response object (especially for the errors handling).
-
- In browser context, it uses [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch)
- for all human browsers and [fetch-ponyfill](https://github.com/qubyte/fetch-ponyfill) for other cases.
-
-
+ This is a HOF (High Order Function) to enhance standard fetch.
+  
  **Features:**
-- fix Edge issues with HTTP methods response headers;
-- timeout handling;
-- response parser
+ - 1) universal: use [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch) 
+ - 2) fix Edge issues with HTTP methods response headers in browser context using [fetch-ponyfill](https://github.com/qubyte/fetch-ponyfill)
+ - 3) timeout handling;
+ - 4) parsing body response: use it or not(default), use default (isEmpty, isJson, isText flags) or use your own
+ - 5) Future: XHR abort handling
 
+ 
 **Warnings**
 Like isomorphic-fetch, this method is added as a global, even when using fetch-ponyfill to fix edge issues.
-Currently the response object shape diff from isomorphic-fetch response.
-
-```
-{
-      json,
-      text,
-      isJson,
-      ok,
-      status,
-      originalResponse,
-  }
-
-```
 
 Example:
 
@@ -246,13 +232,12 @@ Example
 
 
 #### Next Releases
-- fetch response object: no diff with original fetch, only potetial 2 flags more: isJson and isText to better handle response
-- fetch response status handling: delegate to a responseParser, for better customizations   
+- fetch abort handling   
 - Runtime Mocking System
 
 
 #### Credits
-
+- [harlott](https://github.com/harlott)
 - [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch)
 - [fetch-ponyfill](https://github.com/qubyte/fetch-ponyfill)
 
