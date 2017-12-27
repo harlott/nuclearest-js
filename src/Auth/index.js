@@ -108,7 +108,7 @@ class Auth{
   }
 
   _authFailed(reason) {
-    this._resetAuthenticationCallback()
+    this._resetAuthenticationCallback(reason)
     return Promise.reject(reason)
   }
 
