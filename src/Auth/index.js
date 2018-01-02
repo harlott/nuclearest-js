@@ -11,26 +11,20 @@ import { cloneDeep, isFunction, get, isEmpty } from 'lodash'
  *  import Storage, {STORAGE_TYPES} from 'nuclearest-js/Storage'
  *  import fetch from 'nuclearest-js/fetch'
  *  import Headers, {headersMap} from 'nuclearest-js/Headers'
- *
- *  // In a real world authData,CookieStorage, Headers and Auth instances are imported from a service
- *
- *  let authData = {
- *    tokenObject:{
- *      tokenType: 'Bearer',
- *      accessToken: 'a1b2-c3d4-e5f6-g7h8',
- *      refreshToken: 'k1k2-j3j4-l5l6-p7p8',
- *      expiresIn: '2000',
- *      scope: 'user.role'
- *    }
- *  }
- *
+ *  import get from 'lodash/get
+ *  
+ *  // In a real world CookieStorage, Headers and Auth instances are imported from a service
  *
  *
  *  const cookieStorage = new Storage(STORAGE_TYPES.COOKIE, window.cookie, undefined, {enabled: true, 'grantedProps':['country'], callbackOnDisabled: () => {alert('COOKIE DISABLED')}})
  *
+ *  const getAuthData = () => {
+ *    return cookieStorage.getItem('tokenObject')
+ *  }
+ * 
  *  let headers = new Headers()
  *                   .add()
- *                   .oauthToken(authData.tokenObject)
+ *                   .oauthToken(get(getAuthData(), 'tokenObject.accessToken'))
  *                   .custom('x-application-id', clientData.applicationId)
  *                   .use()
  *
@@ -39,14 +33,13 @@ import { cloneDeep, isFunction, get, isEmpty } from 'lodash'
  *      headers: headers,
  *      method: 'POST',
  *      body: JSON.stringify({
- *          refreshToken: authData.tokenObject.refreshToken
+ *          refreshToken: get(getAuthData(), 'tokenObject.refreshToken')
  *      })
  *    })
  *  }
  *
  *  const confirmAuthenticationCallback = (tokenObject) => {
  *    cookieStorage.setItem('tokenObject', tokenObject)
- *    authData.tokenObject = Object.assign({}, tokenObject)
  *  }
  *
  *  const resetAuthenticationCallback = () => {
@@ -54,9 +47,6 @@ import { cloneDeep, isFunction, get, isEmpty } from 'lodash'
  *    location.href = '/login'
  *  }
  *
- *  const getAuthData = () => {
- *    return cookieStorage.getItem('tokenObject')
- *  }
  *
  *  const auth = new Auth(refreshTokenApiCall, confirmAuthenticationCallback, resetAuthenticationCallback)
  *
