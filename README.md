@@ -141,19 +141,7 @@ Example
    import fetch from 'nuclearest-js/fetch'
    import Headers, {headersMap} from 'nuclearest-js/Headers'
 
-   // In a real world authData,CookieStorage, Headers and Auth instances are imported from a service
-
-   let authData = {
-     tokenObject:{
-       tokenType: 'Bearer',
-       accessToken: 'a1b2-c3d4-e5f6-g7h8',
-       refreshToken: 'k1k2-j3j4-l5l6-p7p8',
-       expiresIn: '2000',
-       scope: 'user.role'
-     }
-   }
-
-
+   // In a real world CookieStorage, Headers and Auth instances are imported from a service
 
    const cookieStorage = new Storage(STORAGE_TYPES.COOKIE,
                                      window.cookie,
@@ -164,9 +152,13 @@ Example
                                        callbackOnDisabled: () => {alert('COOKIE DISABLED')}
                                      })
 
+   const getAuthData = () => {
+     return cookieStorage.getItem('tokenObject')
+   }
+
    let headers = new Headers()
                     .add()
-                    .oauthToken(authData.tokenObject)
+                    .oauthToken(get(getAuthData(), 'tokenObject.accessToken'))
                     .custom('x-application-id', clientData.applicationId)
                     .use()
 
@@ -175,23 +167,18 @@ Example
        headers: headers,
        method: 'POST',
        body: JSON.stringify({
-           refreshToken: authData.tokenObject.refreshToken
+           refreshToken: get(getAuthData(), 'tokenObject.refreshToken')
        })
      })
    }
 
    const confirmAuthenticationCallback = (tokenObject) => {
      cookieStorage.setItem('tokenObject', tokenObject)
-     authData.tokenObject = Object.assign({}, tokenObject)
    }
 
    const resetAuthenticationCallback = () => {
      cookieStorage.removeItem('tokenObject')
      location.href = '/login'
-   }
-
-   const getAuthData = () => {
-     return cookieStorage.getItem('tokenObject')
    }
 
    const auth = new Auth(refreshTokenApiCall,
@@ -224,7 +211,7 @@ Example
 
 #### Next Releases
 - fetch abort handling   
-- Runtime Mocking System
+- Runtime Api Mocking System
 
 
 #### Credits
@@ -233,6 +220,10 @@ Example
 - [fetch-ponyfill](https://github.com/qubyte/fetch-ponyfill)
 
 #### Refresh our knowledge
+
+fetch
+- [fetch response](https://fetch.spec.whatwg.org/#responses)
+- [Abortable fetch](https://developers.google.com/web/updates/2017/09/abortable-fetch)
 
 Exploring promises and ES7 async/await
 

@@ -11,7 +11,7 @@ import { cloneDeep, isFunction, get, isEmpty } from 'lodash'
  *  import Storage, {STORAGE_TYPES} from 'nuclearest-js/Storage'
  *  import fetch from 'nuclearest-js/fetch'
  *  import Headers, {headersMap} from 'nuclearest-js/Headers'
- *  import get from 'lodash/get
+ *  import get from 'lodash/get'
  *  
  *  // In a real world CookieStorage, Headers and Auth instances are imported from a service
  *
