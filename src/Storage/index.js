@@ -1,7 +1,8 @@
 import { cloneDeep, merge, get, includes } from 'lodash'
 
 export const STORAGE_TYPES = {
-  'STORAGE': 'storage',
+  'LOCAL_STORAGE': 'localStorage',
+  'SESSION_STORAGE': 'sessionStorage',
   'COOKIE': 'cookie'
 }
 
@@ -34,7 +35,18 @@ export const canUseStorage = (storageType, storage, customStoragesMap) => {
  * @type {Object}
  */
 export const STORAGES_MAP = {
-    storage: {
+    localStorage: {
+        setItem: (propertyName, value, storage) => {
+            storage.setItem(propertyName, JSON.stringify(value))
+        },
+        getItem: (propertyName, storage) => {
+            return storage.getItem(propertyName)
+        },
+        removeItem: (propertyName, storage) => {
+            storage.removeItem(propertyName)
+        }
+    },
+    sessionStorage: {
         setItem: (propertyName, value, storage) => {
             storage.setItem(propertyName, JSON.stringify(value))
         },

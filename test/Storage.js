@@ -90,7 +90,7 @@ describe('Storage', function() {
     })
 
     it('expect get the types map', function(){
-      expect(Storage.getTypesMap()).to.have.all.keys('STORAGE', 'COOKIE')
+      expect(Storage.getTypesMap()).to.have.all.keys('LOCAL_STORAGE', 'SESSION_STORAGE', 'COOKIE')
     })
 
     it('expect add custom storage to Storage instance', function(){
