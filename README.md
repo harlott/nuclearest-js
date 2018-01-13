@@ -229,4 +229,4 @@ Exploring promises and ES7 async/await
 
 - [Promises (Mozilla)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises)
 - [Using promises to await triggered events](https://stackoverflow.com/questions/43084557/using-promises-to-await-triggered-events)
-- [How to return values from an event handler in a promise?](https://stackoverflow.com/questions/43084557/using-promises-to-await-triggered-events)
+- [How to return values from an event handler in a promise?](https://stackoverflow.com/questions/38942354/how-to-return-values-from-an-event-handler-in-a-promise)
