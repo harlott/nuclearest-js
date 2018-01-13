@@ -159,7 +159,7 @@ class Storage {
       if (canUseStorage(this.STORAGE_TYPE, this.STORAGE, this.STORAGES_MAP) === true){
           return this.STORAGES_MAP[this.STORAGE_TYPE][methodName](...params)
       } else {
-        if (this.CUSTOM_FALLBACK_STORAGE.enabled === false) {
+        if (get(this.CUSTOM_FALLBACK_STORAGE, 'enabled') === false) {
           return
         }
           if (!includes(get(this.CUSTOM_FALLBACK_STORAGE, 'grantedProps'), params[0])){
@@ -167,7 +167,6 @@ class Storage {
             if (callbackOnDisabled !== undefined){
               callbackOnDisabled()
             }
-            throw new Error(`Cannot use property "'+${params[0]}+'" in fallback storage. You can use fallbackStorage "grantedProps" option to grant`)
           }
           return _defaultFallbackStoragesMap[_fallbackStorageType][methodName](...params, this.STORAGE)
       }
