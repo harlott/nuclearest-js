@@ -56,12 +56,12 @@ const DEFAULT_TIMEOUT = 10000
 const fetch = async (url, options) => {
   try {
     _fetch = configForBrowserContext(_fetch)
-    const _fetchResponse = await timeoutWrapper(_fetch, url, options, options.timeout || DEFAULT_TIMEOUT)
+    const _fetchResponse = await timeoutWrapper(_fetch, url, options, get(options, 'timeout') || DEFAULT_TIMEOUT)
     if (options.parseResponse === false){
       return Promise.resolve(_fetchResponse)
     }
 
-    if (isFunction(options.responseParser)){
+    if (isFunction(get(options, 'responseParser'))){
       return options.responseParser(_fetchResponse)
     } else {
       return defaultResponseParser(_fetchResponse)
