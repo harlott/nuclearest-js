@@ -12,8 +12,10 @@
     "watch": "scripty",
     "test": "cross-env NODE_ENV=test nyc mocha -R spec --compilers js:babel-register  --recursive && nyc report --reporter=text-lcov | coveralls",
     "test:noCoverall": "cross-env NODE_ENV=test nyc mocha -R spec --compilers js:babel-register  --recursive",
+    "test:fetch": "cross-env NODE_ENV=test nyc mocha fetchTest -R spec --compilers js:babel-register  --recursive",
     "test:watch": "npm test -- --watch ",
-    "test:watchNoCoverall": "npm run test:noCoverall -- --watch"
+    "test:watchNoCoverall": "npm run test:noCoverall -- --watch",
+    "test:watchFetch": "npm run test:fetch -- --watch"
   },
   "repository": {
     "type": "git",
@@ -57,10 +59,13 @@
     "es6-promise": "^4.1.0",
     "eslint": "^4.13.1",
     "events": "^1.1.1",
+    "express": "^4.16.2",
     "fs-extra": "^5.0.0",
     "jsdoc": "^3.5.5",
+    "jsdom": "^11.5.1",
     "mocha": "^4.0.1",
     "mochawesome": "^3.0.0",
+    "nock": "^9.1.5",
     "nodemon": "^1.13.3",
     "nyc": "^11.3.0",
     "query-string-object": "^0.2.5",
@@ -73,7 +78,7 @@
     "yargs": "^10.0.3"
   },
   "dependencies": {
-    "express": "^4.16.2",
+    "abortcontroller-polyfill": "^1.0.9",
     "fetch-ponyfill": "^4.1.0",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.4",
