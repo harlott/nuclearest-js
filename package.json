@@ -74,7 +74,7 @@
   },
   "dependencies": {
     "express": "^4.16.2",
-    "fetch-ponyfill": "^4.1.0",
+    "fetch-ponyfill": "^6.0.2",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.4",
     "require": "^2.4.20"
