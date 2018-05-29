@@ -136,12 +136,24 @@ export default function authProxy(configRefreshToken, apiMethod, successCallback
         return;
     }
 
+    let count = 0;
+
     const eventCallback = () => {
         apiMethod().then((response) => {
+            count += 1;
+
             window.removeEventListener('token', eventCallback)
-            successCallback(response)
+          if (count >= 3 ){
+
+          }
+          successCallback(response)
         })
         .catch((apiMethodError) => {
+          count += 1;
+            if (count >= 3 ){
+                console.log('error ' + JSON.stringify(apiMethodError))
+
+          }
             if (apiMethodError.ok === false && apiMethodError.status === 401){
                 window.addEventListener('token', eventCallback)
                 try {

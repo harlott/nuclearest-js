@@ -1,6 +1,6 @@
 export default class RefreshTokenHandler {
-    constructor(configRefreshTokentData) {
-        this.configRefreshTokentData = Object.assign({}, configRefreshTokentData)
+    constructor(configRefreshToken) {
+        this.configRefreshToken = Object.assign({}, configRefreshToken)
 
         if(!RefreshTokenHandler.instance){
             RefreshTokenHandler.instance = this;
@@ -12,18 +12,27 @@ export default class RefreshTokenHandler {
 
     refreshToken(){
         const { refreshTokenMethod, confirmAuthenticationCallback, resetAuthenticationCallback } = this.configRefreshToken
+
         refreshTokenMethod().then((resp) => {
-            confirmAuthenticationCallback(resp.jsonBody)
-            let event = new Event('token');
-            window.dispatchEvent(event);
-            RefreshTokenHandler.instance.sem = require('semaphore')(1)
-        })
-        .catch((e) => {
-            if (e.ok === false) {
-                resetAuthenticationCallback(e)
-            } else {
-                throw e
-            }
+            console.log('refreshTokenMethod => resp.status => ', resp.status)
+            resp
+              .json()
+              .then((json) => {
+                confirmAuthenticationCallback(json)
+              })
+              .catch((jsonErr) => {
+                console.error(jsonErr)
+              })
+              let event = new Event('token');
+              window.dispatchEvent(event);
+              RefreshTokenHandler.instance.sem = require('semaphore')(1)
+          })
+          .catch((e) => {
+              if (e.ok === false) {
+                  resetAuthenticationCallback(e)
+              } else {
+                  throw e
+              }
         })
     }
 }
