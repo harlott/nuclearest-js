@@ -1,8 +1,16 @@
 import Storage, { buildCustomStorage, buildCustomStoragesMap} from '../src/Storage'
+const EventEmitter = require('events');
+const emitter = new EventEmitter();
 
 before(function() {
-  console.log('global setup');
-  global.window = {}
+  global.window = {
+    addEventListener: (eventName, listener) => {
+      emitter.on(eventName, listener)
+    },
+    removeEventListener: (eventName, listener) => {
+      emitter.off(eventName, listener)
+    }
+  }
   global.navigator = {}
   global.context = {
     browser: {
