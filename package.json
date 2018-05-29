@@ -1,7 +1,7 @@
 {
   "name": "nuclearest-js",
   "version": "0.7.2-alpha",
-  "description": "A modern Javascript rest API toolbox",
+  "description": "A Javascript rest API toolbox",
   "publishConfig": {
     "registry": "https://npm.registry.com/"
   },
@@ -12,10 +12,8 @@
     "watch": "scripty",
     "test": "cross-env NODE_ENV=test nyc mocha -R spec --compilers js:babel-register  --recursive && nyc report --reporter=text-lcov | coveralls",
     "test:noCoverall": "cross-env NODE_ENV=test nyc mocha -R spec --compilers js:babel-register  --recursive",
-    "test:fetch": "cross-env NODE_ENV=test nyc mocha fetchTest -R spec --compilers js:babel-register  --recursive",
     "test:watch": "npm test -- --watch ",
-    "test:watchNoCoverall": "npm run test:noCoverall -- --watch",
-    "test:watchFetch": "npm run test:fetch -- --watch"
+    "test:watchNoCoverall": "npm run test:noCoverall -- --watch"
   },
   "repository": {
     "type": "git",
@@ -33,7 +31,7 @@
   "author": "harlott",
   "license": "MIT",
   "devDependencies": {
-    "autoprefixer": "^7.2.3",
+    "autoprefixer": "^8.0.0",
     "autoprefixer-loader": "^3.2.0",
     "babel-cli": "^6.11.4",
     "babel-core": "^6.22.1",
@@ -58,12 +56,13 @@
     "docdown": "^0.7.2",
     "es6-promise": "^4.1.0",
     "eslint": "^4.13.1",
-    "events": "^1.1.1",
-    "express": "^4.16.2",
-    "fs-extra": "^5.0.0",
+
+    "events": "^3.0.0",
+    "events": "^3.0.0",
+    "fs-extra": "^6.0.0",
     "jsdoc": "^3.5.5",
     "jsdom": "^11.5.1",
-    "mocha": "^4.0.1",
+    "mocha": "^5.1.1",
     "mochawesome": "^3.0.0",
     "nock": "^9.1.5",
     "nodemon": "^1.13.3",
@@ -71,15 +70,15 @@
     "query-string-object": "^0.2.5",
     "request": "^2.81.0",
     "scripty": "^1.7.0",
-    "standard": "^10.0.3",
+    "standard": "^11.0.0",
     "transform-runtime": "0.0.0",
-    "webpack": "^3.10.0",
+    "webpack": "^4.9.1",
     "winston": "^2.3.1",
-    "yargs": "^10.0.3"
+    "yargs": "^11.0.0"
   },
   "dependencies": {
-    "abortcontroller-polyfill": "^1.0.9",
-    "fetch-ponyfill": "^4.1.0",
+    "express": "^4.16.2",
+    "fetch-ponyfill": "^6.0.2",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.4",
     "require": "^2.4.20"
