@@ -127,13 +127,25 @@ import get from 'lodash/get'
 import RefreshTokenHandler from './RefreshTokenHandler'
 
 const eventCallback = (apiMethod, refreshTokenHandler, successCallback, errorCallback) => {
-    apiMethod().then((response) => {
-        window.removeEventListener('token', eventCallback)
+    const listener = () => {
+      apiMethod().then((response) => {
+        console.log('INSIDE eventCallback apiMethod resolution')
+        window.removeEventListener('token', listener)
+        successCallback(response)
+      })
+        .catch((apiMethodError) => {
+          errorCallback(apiMethodError)
+        })
+    }
+
+  apiMethod().then((response) => {
+      console.log('INSIDE eventCallback apiMethod resolution')
+        window.removeEventListener('token', listener)
         successCallback(response)
     })
     .catch((apiMethodError) => {
         if (apiMethodError.ok === false && apiMethodError.status === 401){
-            window.addEventListener('token', eventCallback)
+            window.addEventListener('token', listener)
             try {
                 const semExecuter = function(){
                     refreshTokenHandler.refreshToken()
@@ -148,19 +160,21 @@ const eventCallback = (apiMethod, refreshTokenHandler, successCallback, errorCal
     })
 }
 
-export default function authProxy(configRefreshToken, apiMethod, successCallback, errorCallback) {
-    const { getAuthData, resetAuthenticationCallback } = configRefreshToken
-    const refreshTokenHandler = new RefreshTokenHandler(configRefreshToken)
+const authProxy = (configRefreshToken, apiMethod, successCallback, errorCallback) => {
+  const { getAuthData, resetAuthenticationCallback } = configRefreshToken
+  const refreshTokenHandler = new RefreshTokenHandler(configRefreshToken)
 
-    if (!get(getAuthData(), 'tokenObject') && (!!resetAuthenticationCallback && typeof resetAuthenticationCallback === 'function')) {
-        resetAuthenticationCallback()
-        errorCallback({ok: false, status: 401});
-        return;
-    }
+  if (!get(getAuthData(), 'tokenObject') && (!!resetAuthenticationCallback && typeof resetAuthenticationCallback === 'function')) {
+    resetAuthenticationCallback()
+    errorCallback({ok: false, status: 401});
+    return;
+  }
 
-    try {
-        eventCallback(apiMethod, refreshTokenHandler, successCallback, errorCallback)
-    } catch (e) {
-        errorCallback(e)
-    }
+  try {
+    eventCallback(apiMethod, refreshTokenHandler, successCallback, errorCallback)
+  } catch (e) {
+    errorCallback(e)
+  }
 }
+
+export default authProxy
