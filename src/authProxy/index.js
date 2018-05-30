@@ -126,6 +126,28 @@ import get from 'lodash/get'
 
 import RefreshTokenHandler from './RefreshTokenHandler'
 
+const eventCallback = (apiMethod, refreshTokenHandler, successCallback, errorCallback) => {
+    apiMethod().then((response) => {
+        window.removeEventListener('token', eventCallback)
+        successCallback(response)
+    })
+    .catch((apiMethodError) => {
+        if (apiMethodError.ok === false && apiMethodError.status === 401){
+            window.addEventListener('token', eventCallback)
+            try {
+                const semExecuter = function(){
+                    refreshTokenHandler.refreshToken()
+                }
+                refreshTokenHandler.sem.take(semExecuter)
+            } catch (e) {
+                errorCallback(e)
+            }
+        } else {
+            errorCallback(apiMethodError)
+        }
+    })
+}
+
 export default function authProxy(configRefreshToken, apiMethod, successCallback, errorCallback) {
     const { getAuthData, resetAuthenticationCallback } = configRefreshToken
     const refreshTokenHandler = new RefreshTokenHandler(configRefreshToken)
@@ -136,42 +158,8 @@ export default function authProxy(configRefreshToken, apiMethod, successCallback
         return;
     }
 
-    let count = 0;
-
-    const eventCallback = () => {
-        apiMethod().then((response) => {
-            count += 1;
-
-            window.removeEventListener('token', eventCallback)
-          if (count >= 3 ){
-
-          }
-          successCallback(response)
-        })
-        .catch((apiMethodError) => {
-          count += 1;
-            if (count >= 3 ){
-                console.log('error ' + JSON.stringify(apiMethodError))
-
-          }
-            if (apiMethodError.ok === false && apiMethodError.status === 401){
-                window.addEventListener('token', eventCallback)
-                try {
-                    const semExecuter = function(){
-                        refreshTokenHandler.refreshToken()
-                    }
-                    refreshTokenHandler.sem.take(semExecuter)
-                } catch (e) {
-                    errorCallback(e)
-                }
-            } else {
-                errorCallback(apiMethodError)
-            }
-        })
-    }
-
     try {
-        eventCallback()
+        eventCallback(apiMethod, refreshTokenHandler, successCallback, errorCallback)
     } catch (e) {
         errorCallback(e)
     }
