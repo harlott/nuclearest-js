@@ -19,6 +19,7 @@ export default class RefreshTokenHandler {
               .json()
               .then((json) => {
                 confirmAuthenticationCallback(json)
+                console.log(`REFRESH TOKEN GET AUTH DATA AFTER CONFIRM CALLBACK => ${JSON.stringify(this.configRefreshToken.getAuthData())}`)
               })
               .catch((jsonErr) => {
                 console.error(jsonErr)
