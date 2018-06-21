@@ -9,17 +9,11 @@ chai.use(chaiAsPromised)
 
 const processRefreshTokenGrantedMultipleCalls = () => {
   it('expect to fail authentication, post refresh token and process multiple calls ', async () => {
-    let __filesystem3__ = {}
-    const customConfigRefreshToken = getConfigRefreshTokenByStorage(__filesystem3__ , 'fileSystem3')
+    let __filesystem4__ = {}
+    const customConfigRefreshToken = getConfigRefreshTokenByStorage(__filesystem4__ , 'fileSystem4')
     const mockedCalls = new mockedApiCalls(customConfigRefreshToken.getAuthData)
     try {
-      const {
-        callRes1,
-        callRes2,
-        callRes3,
-        callRes4,
-        callRes5
-      } = await Promise.all(
+      await Promise.all(
           [
             authResponseHandler(customConfigRefreshToken, mockedCalls.fetchNoAuth),
             authResponseHandler(customConfigRefreshToken, mockedCalls.fetchNoAuth),
@@ -29,6 +23,7 @@ const processRefreshTokenGrantedMultipleCalls = () => {
           ]
       )
     } catch(e){
+      console.log(customConfigRefreshToken.getAuthData().tokenObject)
       if (e.ok !== true){
         throw new Error(JSON.stringify(e))
       }

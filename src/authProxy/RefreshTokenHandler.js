@@ -2,7 +2,7 @@ export default class RefreshTokenHandler {
     constructor(configRefreshToken) {
         this.configRefreshToken = Object.assign({}, configRefreshToken)
 
-        if(!RefreshTokenHandler.instance){
+        if (!RefreshTokenHandler.instance){
             RefreshTokenHandler.instance = this;
             RefreshTokenHandler.instance.sem = require('semaphore')(1);
         }
@@ -20,17 +20,21 @@ export default class RefreshTokenHandler {
               .then((json) => {
                 confirmAuthenticationCallback(json)
                 console.log(`REFRESH TOKEN GET AUTH DATA AFTER CONFIRM CALLBACK => ${JSON.stringify(this.configRefreshToken.getAuthData())}`)
+
+                let event = new Event('token');
+                window.dispatchEvent(event);
+                RefreshTokenHandler.instance.sem = require('semaphore')(1)
+
               })
               .catch((jsonErr) => {
                 console.error(jsonErr)
               })
-              let event = new Event('token');
-              window.dispatchEvent(event);
-              RefreshTokenHandler.instance.sem = require('semaphore')(1)
+
           })
           .catch((e) => {
               if (e.ok === false) {
-                  resetAuthenticationCallback(e)
+                RefreshTokenHandler.instance.sem = require('semaphore')(1)
+                resetAuthenticationCallback(e)
               } else {
                   throw e
               }

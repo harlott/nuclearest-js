@@ -18,6 +18,7 @@ class mockedApiCalls{
   }
 
   fetchNoAuth() {
+    console.log(`fetchNoAuth: current token = ${getAuthData().tokenObject.accessToken}`)
     if (getAuthData().tokenObject.accessToken === '11111'){
       return new Promise((resolve, reject) => {
         reject(MOCKED_RESPONSES.NOT_AUTH)

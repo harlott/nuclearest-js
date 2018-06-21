@@ -126,16 +126,17 @@ import get from 'lodash/get'
 
 import RefreshTokenHandler from './RefreshTokenHandler'
 
-const eventCallback = (apiMethod, refreshTokenHandler, successCallback, errorCallback) => {
+const eventCallback = (apiMethod, configRefreshToken, refreshTokenHandler, successCallback, errorCallback) => {
     const listener = () => {
+      console.log('LISTENER authData => ' + JSON.stringify(configRefreshToken.getAuthData()))
       apiMethod().then((response) => {
         console.log('INSIDE eventCallback apiMethod resolution')
         window.removeEventListener('token', listener)
         successCallback(response)
       })
-        .catch((apiMethodError) => {
-          errorCallback(apiMethodError)
-        })
+      .catch((apiMethodError) => {
+        errorCallback(apiMethodError)
+      })
     }
 
   apiMethod().then((response) => {
@@ -171,7 +172,7 @@ const authProxy = (configRefreshToken, apiMethod, successCallback, errorCallback
   }
 
   try {
-    eventCallback(apiMethod, refreshTokenHandler, successCallback, errorCallback)
+    eventCallback(apiMethod, configRefreshToken, refreshTokenHandler, successCallback, errorCallback)
   } catch (e) {
     errorCallback(e)
   }
