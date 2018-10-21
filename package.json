@@ -70,7 +70,7 @@
     "scripty": "^1.7.0",
     "standard": "^11.0.0",
     "transform-runtime": "0.0.0",
-    "webpack": "^4.9.1",
+    "webpack": "^4.22.0",
     "winston": "^2.3.1",
     "yargs": "^11.0.0"
   },
