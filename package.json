@@ -31,7 +31,7 @@
   "author": "harlott",
   "license": "MIT",
   "devDependencies": {
-    "autoprefixer": "^9.0.0",
+    "autoprefixer": "^9.4.10",
     "autoprefixer-loader": "^3.2.0",
     "babel-cli": "^6.11.4",
     "babel-core": "^6.22.1",
