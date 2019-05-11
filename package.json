@@ -59,7 +59,7 @@
 
     "events": "^3.0.0",
     "events": "^3.0.0",
-    "fs-extra": "^7.0.0",
+    "fs-extra": "^8.0.0",
     "jsdoc": "^3.5.5",
     "mocha": "^5.1.1",
     "mochawesome": "^3.0.0",
