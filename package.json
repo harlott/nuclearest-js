@@ -54,7 +54,7 @@
     "coveralls": "^3.0.0",
     "cross-env": "^5.1.1",
     "docdown": "^0.7.2",
-    "es6-promise": "^4.1.0",
+    "es6-promise": "^4.2.8",
     "eslint": "^5.0.1",
 
     "events": "^3.0.0",
