@@ -4,7 +4,7 @@ NucleaRest JS v0.7.1-alpha
 [![Build Status](https://travis-ci.org/harlott/nuclearest-js.svg?branch=master)](https://travis-ci.org/harlott/nuclearest-js)  [![Coverage Status](https://coveralls.io/repos/github/harlott/nuclearest-js/badge.svg?branch=master)](https://coveralls.io/github/harlott/nuclearest-js?branch=master) [![Greenkeeper badge](https://badges.greenkeeper.io/harlott/nuclearest-js.svg)](https://greenkeeper.io/)
 
 
-A modern Javascript Rest API toolbox!
+Personal Javascript Rest API toolbox
 ----------
 
 
@@ -15,7 +15,7 @@ NucleaRest will be a set of Javascript Rest utilities and practices for SPA appl
 #### fetch (enhanced)
 
 
- This is a HOF (High Order Function) to enhance standard fetch.
+ This is a proxy method to enhance standard fetch.
   
  **Features:**
  - universal: use [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch) 
